@@ -19,11 +19,12 @@ use App\Http\Controllers\FrontendController;
 |--------------------------------------------------------------------------
 */
 Route::name('frontend.')->group(function () {
-    Route::get('/', [FrontendController::class, 'index'])->name('home');
-    Route::get('/kategori/{slug}', [FrontendController::class, 'category'])->name('category');
-    Route::get('/haber/{slug}', [FrontendController::class, 'blogDetail'])->name('blog.detail');
-    Route::get('/yazarlar', [FrontendController::class, 'authors'])->name('author');
-    Route::get('/yazar/{slug}', [FrontendController::class, 'authorDetail'])->name('author.detail');
+    Route::get('/', [FrontendController::class, 'index'])->name('pages.home');
+    Route::get('/hakkimizda', [FrontendController::class, 'about'])->name('pages.about');
+    Route::get('/hizmetlerimiz', [FrontendController::class, 'services'])->name('pages.services');
+    Route::get('/projelerimiz', [FrontendController::class, 'projects'])->name('pages.projects');
+    Route::get('/blog', [FrontendController::class, 'blogs'])->name('blog.index'); // Blog listeleme sayfası
+    Route::get('/iletisim', [FrontendController::class, 'contact'])->name('pages.contact');
 });
 
 /*
@@ -129,4 +130,9 @@ Route::get('/migrate-now', function() {
     } catch (Exception $e) {
         return 'Hata oluştu: ' . $e->getMessage();
     }
+});
+
+Route::get('/tree', function () {
+    $path = base_path('public/theme');
+    return "<pre>" . \App\Helpers\DirectoryTree::getTree($path) . "</pre>";
 });

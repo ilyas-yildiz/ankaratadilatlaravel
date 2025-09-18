@@ -20,5 +20,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
-/public/theme
-!/public/theme/css/custom.css
+/public/theme/*
+!/public/theme/css/
+!/public/theme/js/

@@ -8,7 +8,8 @@ use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\GalleryItemController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\AuthorController;
-use App\Http\Controllers\Admin\ProductController; // 1. ProductController'ı dahil et
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SlideController; // << YENİ EKLENEN SATIR
 use App\Http\Middleware\RedirectIfLoggedIn;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FrontendController;
@@ -19,12 +20,12 @@ use App\Http\Controllers\FrontendController;
 |--------------------------------------------------------------------------
 */
 Route::name('frontend.')->group(function () {
-    Route::get('/', [FrontendController::class, 'index'])->name('pages.home');
-    Route::get('/hakkimizda', [FrontendController::class, 'about'])->name('pages.about');
-    Route::get('/hizmetlerimiz', [FrontendController::class, 'services'])->name('pages.services');
-    Route::get('/projelerimiz', [FrontendController::class, 'projects'])->name('pages.projects');
-    Route::get('/blog', [FrontendController::class, 'blogs'])->name('blog.index'); // Blog listeleme sayfası
-    Route::get('/iletisim', [FrontendController::class, 'contact'])->name('pages.contact');
+    Route::get('/', [FrontendController::class, 'index'])->name('home');
+    Route::get('/hakkimizda', [FrontendController::class, 'about'])->name('about');
+    Route::get('/hizmetlerimiz', [FrontendController::class, 'services'])->name('service');
+    Route::get('/projelerimiz', [FrontendController::class, 'projects'])->name('project');
+    Route::get('/blog', [FrontendController::class, 'blogs'])->name('blog'); // Blog listeleme sayfası
+    Route::get('/iletisim', [FrontendController::class, 'contact'])->name('contact');
 });
 
 /*
@@ -57,6 +58,7 @@ Route::middleware('auth')->group(function () {
             'blogs'      => BlogController::class,
             'authors'    => AuthorController::class,
             'products'   => ProductController::class, // 2. Product modülünü diziye ekle
+            'slides'     => SlideController::class, // << YENİ EKLENEN SATIR
         ];
 
         foreach ($resourceControllers as $name => $controller) {

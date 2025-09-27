@@ -11487,7 +11487,7 @@ display:block;
 #search .search-btn {
 	border: none;
 	background: none;
-	padding: 0px 30px;
+	padding: 25px 30px 0 30px;
 	outline:none;
 	color: #fff;
 }

@@ -55,6 +55,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link menu-link" href="{{ url('/admin/slides') }}">
+                    <i class="mdi mdi-image-multiple"></i> <span data-key="t-widgets">Slide</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link menu-link" href="{{ url('/admin/settings') }}">
                     <i class="mdi mdi-cog"></i> <span data-key="t-widgets">Ayarlar</span>
                 </a>

@@ -1,135 +1,166 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
+use App\Models\Slide; // <-- Bu import OLMALI
 use Illuminate\Http\Request;
-use App\Models\Slide;
 use Illuminate\Support\Facades\File;
-// << BU SATIRI EKLE
+use Illuminate\Support\Str;
+use App\Services\ImageService; // Servisi import edin
+
+
 class SlideController extends Controller
 {
     /**
-     * Tüm slaytları listeleyen sayfayı gösterir.
-     * Bu genellikle admin panelindeki "Slaytlar" ana sayfasıdır.
+     * Display a listing of the resource.
      */
-    public function index()
+
+    // Görsellerin kaydedileceği ana dizin (Storage/public altındaki)
+    protected $basePath = 'slide-images';
+
+    // ImageService tarafından oluşturulacak boyutlar
+    protected $sizes = [
+        '1920x600', // Ana slayt boyutu
+        '600x400',  // Admin listesi/önizleme için küçük boyut
+    ];
+
+public function index()
     {
-        // Slaytları 'order' sütununa göre sıralayarak çekiyoruz.
-        $slides = Slide::orderBy('order', 'asc')->get();
-        return view('admin.slides.index', compact('slides'));
+        // dd('TEST 1 BAŞARILI: Controller basariyla calisiyor.'); // Bu satırı SİLİN.
+        
+        $items = Slide::orderBy('order')->get(); // <-- Bu satır hata veriyor olabilir.
+        
+        // Eğer bu satıra ulaşırsak, View hatasız yüklenmeli.
+        return view('admin.slides.index', compact('items'));
     }
+
     /**
-     * Yeni bir slayt ekleme formunu gösteren sayfayı açar.
+     * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view('admin.slides.create');
+        //
     }
+
     /**
-     * 'create' formundan gelen bilgileri veritabanına kaydeder.
+     * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        // 1. Gelen veriyi doğrula
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'link' => 'nullable|url',
-            'new_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
-        $imagePath = null;
-        // 2. Görseli Yükle (public/storage içine)
-        if ($request->hasFile('new_image')) {
-            $image = $request->file('new_image');
-            // Çakışmaları önlemek için dosya adını zaman damgası ile yeniden adlandırıyoruz
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            // Dosyayı public/storage/slides klasörüne taşıyoruz
-            $image->move(public_path('storage/slides'), $imageName);
-            // Veritabanına kaydedilecek yolu oluşturuyoruz
-            $imagePath = 'slides/' . $imageName;
+   public function store(Request $request, ImageService $imageService) // <-- ImageService'i ENJEKTE EDİN
+{
+    // 1. Doğrulama (Görsel artık zorunlu)
+    $request->validate([
+        'title' => 'nullable|string|max:255',
+        'subtitle' => 'nullable|string|max:255',
+        'link' => 'nullable|url|max:255',
+        'button_text' => 'nullable|string|max:50',
+        'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:3072', // 'image' alanı
+    ]);
+    
+    $fileName = null;
+    
+    // 2. ImageService ile Görsel Yükleme
+    if ($request->hasFile('image')) {
+        $file = $request->file('image');
+        
+        // ImageService'in saveImage metodunu kullan
+        $fileName = $imageService->saveImage($file, $this->basePath, $this->sizes); 
+
+        if (!$fileName) {
+            return redirect()->route('admin.slides.index')->with('error', 'Görsel yüklenirken bir hata oluştu!')->withInput();
         }
-        // 3. Veritabanına kaydedilecek verileri hazırla
-        $dataToSave = [
-            'title' => $validated['title'],
-            'subtitle' => $validated['subtitle'],
-            'link' => $validated['link'],
-            'image' => $imagePath,
-            'status' => $request->has('status'),
-        ];
-        // 4. Veritabanına kaydet
-        Slide::create($dataToSave);
-        // store metodunun sonu...
-// 5. Başarılı cevabı döndür
-        if ($request->wantsJson()) {
-            // Eğer istek AJAX ile geldiyse, JSON cevabı döndür
-            return response()->json([
-                'success' => true,
-                'message' => 'Slayt başarıyla eklendi!'
-            ]);
-        }
-// Eğer istek normal bir form gönderimi ise (JavaScript kapalıysa vb.), yönlendirme yap
-        return redirect()->route('admin.slides.index')->with('success', 'Slayt başarıyla eklendi!');
     }
+
+    // 3. Veritabanına Kayıt
+    $slide = Slide::create([
+        'title' => $request->title,
+        'subtitle' => $request->subtitle,
+        'link' => $request->link,
+        'button_text' => $request->button_text,
+        'image_url' => $fileName,
+        'order' => Slide::max('order') + 1,
+        'status' => true, // <-- Otomatik olarak AKTİF (true) yapıldı.
+    ]);
+
+    return redirect()->route('admin.slides.index')->with('success', 'Slayt başarıyla eklendi!');
+}
+
     /**
-     * Belirli bir slaytın detaylarını gösterir. (Genellikle admin panellerinde çok kullanılmaz)
+     * Display the specified resource.
      */
-    public function show($id)
+    public function show(string $id)
     {
         //
     }
+
     /**
-     * Belirli bir slaytı düzenlemek için formu gösterir.
+     * Show the form for editing the specified resource.
      */
-    public function edit(Slide $slide)
+    public function edit(string $id)
     {
-        $data = $slide->toArray();
-        unset($data['image']);
-        $data['image_full_url'] = $slide->image_full_url;
-        return response()->json($data);
+        //
     }
+
     /**
-     * 'edit' formundan gelen güncel bilgileri veritabanına kaydeder.
+     * Update the specified resource in storage.
      */
-    public function update(Request $request, Slide $slide)
-    {
-        // 1. Gelen veriyi doğrula (resim zorunlu değil)
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'link' => 'nullable|url',
-            'new_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
-        // 2. Yeni görsel yüklendiyse eskisini sil, yenisini kaydet
-        if ($request->hasFile('new_image')) {
-            // Eski resmi sil
-            if (File::exists(public_path('storage/' . $slide->image))) {
-                File::delete(public_path('storage/' . $slide->image));
-            }
-            // Yeni resmi yükle
-            $image     = $request->file('new_image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('storage/slides'), $imageName);
-            $validated['image'] = 'slides/' . $imageName;
+   public function update(Request $request, Slide $slide, ImageService $imageService)
+{
+    // 1. Doğrulama (Görsel alanı artık 'nullable' (isteğe bağlı) olmalıdır)
+    $request->validate([
+        'title' => 'nullable|string|max:255',
+        'subtitle' => 'nullable|string|max:255',
+        'link' => 'nullable|url|max:255',
+        'button_text' => 'nullable|string|max:50',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072', // Görsel opsiyonel
+
+    ]);
+
+    // 2. Görsel Güncelleme İşlemi
+    if ($request->hasFile('image')) {
+        
+        // a) Eski görseli SİLME (ImageService ile)
+        if ($slide->image_url) {
+            // base_path ve sizes değişkenlerini SlideController sınıfında tanımlamıştık.
+            $imageService->deleteImages($slide->image_url, $this->basePath, $this->sizes);
         }
-        // 3. Durum (status) verisini işle
-        $validated['status'] = $request->has('status');
-// 4. Veritabanında güncelle
-        $slide->update($validated);
-// 5. Başarılı cevabı döndür
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Slayt başarıyla güncellendi!'
-            ]);
+        
+        // b) Yeni görseli YÜKLEME (ImageService ile)
+        $file = $request->file('image');
+        $fileName = $imageService->saveImage($file, $this->basePath, $this->sizes); 
+
+        if ($fileName) {
+            // Yeni dosya adını veritabanına kaydetmek için slayt objesine atama
+            $slide->image_url = $fileName;
+        } else {
+            // Görsel yüklemede hata varsa geri dön
+            return redirect()->back()->with('error', 'Yeni görsel yüklenirken bir hata oluştu!');
         }
-        return redirect()->route('admin.slides.index')->with('success', 'Slayt başarıyla güncellendi!');
     }
+    
+    // 3. Veritabanı Kaydını Güncelleme
+    $slide->title = $request->title;
+    $slide->subtitle = $request->subtitle;
+    $slide->link = $request->link;
+    $slide->button_text = $request->button_text;
+    
+    $slide->save();
+
+    return redirect()->route('admin.slides.index')->with('success', 'Slayt başarıyla güncellendi!');
+}
+
     /**
-     * Belirli bir slaytı veritabanından siler.
+     * Remove the specified resource from storage.
      */
-    public function destroy(Slide $slide)
-    {
-        $slide->delete(); // Model'deki booted metodu görseli silecek
-        // Standart form gönderimi olduğu için sayfaya yönlendirme yapıyoruz
-        return redirect()->route('admin.slides.index')->with('success', 'Slayt başarıyla silindi.');
+    public function destroy(Slide $slide, ImageService $imageService) // <-- ImageService'i ENJEKTE EDİN
+{
+    // Görseli ImageService ile silme
+    if ($slide->image_url) {
+        $imageService->deleteImages($slide->image_url, $this->basePath, $this->sizes);
     }
+    
+    $slide->delete();
+
+    return redirect()->route('admin.slides.index')->with('success', 'Slayt başarıyla silindi!');
+}
 }

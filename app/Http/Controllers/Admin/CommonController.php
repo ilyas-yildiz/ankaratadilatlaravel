@@ -27,38 +27,29 @@ class CommonController extends Controller
             'authors' => \App\Models\Author::class,
             'blogs' => \App\Models\Blog::class,
             'products' => \App\Models\Product::class,
-            'slides'     => \App\Models\Slide::class, // << YENİ EKLENEN SATIR
+            'slides' => \App\Models\Slide::class,
+            'references' => \App\Models\Reference::class,
+
             // 'categories' => \App\Models\Category::class, // Eğer Category modeliniz varsa bu satırı aktif edin
         ];
     }
 
-    public function updateStatus(Request $request, string $modelName, int $id)
+    public function updateStatus(Request $request, $modelName, $id)
     {
-        $allowedModels = $this->getAllowedModels();
+        // Model ismini uygun bir formata dönüştür (örn: 'categories' -> 'Category')
+        $modelClass = 'App\\Models\\' . Str::singular(Str::studly($modelName));
 
-        // 1. GÜVENLİK: Modelin izin verilenler listesinde olduğunu doğrula.
-        if (!array_key_exists($modelName, $allowedModels)) {
-            return response()->json(['success' => false, 'message' => 'Geçersiz model adı.'], 403);
+        // Modelin var olup olmadığını ve bir Eloquent model olduğunu kontrol et
+        if (! class_exists($modelClass)) {
+            return response()->json(['success' => false, 'message' => 'Model bulunamadı.'], 404);
         }
 
-        // 2. DOĞRU VERİ TİPİ: Gelen "1" veya "0" string'ini gerçek true/false değerine çevir.
-        $status = filter_var($request->input('status'), FILTER_VALIDATE_BOOLEAN);
+        // Modeli bul ve statüsünü güncelle
+        $model = $modelClass::findOrFail($id);
+        $model->status = $request->input('status', false); // Varsayılan değer false
+        $model->save();
 
-        try {
-            $modelClass = $allowedModels[$modelName];
-            $item = $modelClass::findOrFail($id);
-
-            // 3. ATAMA VE KAYDETME: Doğru veri tipindeki status'u ata ve kaydet.
-            $item->status = $status;
-            $item->save();
-
-            // 4. BAŞARILI YANIT: JavaScript'e işlemin başarılı olduğunu ve iziToast'u göstermesi gerektiğini söyle.
-            return response()->json(['success' => true, 'message' => 'Durum başarıyla güncellendi.']);
-
-        } catch (Throwable $e) {
-            Log::error("Durum güncelleme hatası ({$modelName} - ID: {$id}): " . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'İşlem sırasında bir sunucu hatası oluştu.'], 500);
-        }
+        return response()->json(['success' => true, 'message' => 'Durum başarıyla güncellendi.']);
     }
 
     /**

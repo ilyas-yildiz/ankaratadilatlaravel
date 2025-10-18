@@ -55,15 +55,21 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ url('/admin/slides') }}">
-                    <i class="mdi mdi-image-multiple"></i> <span data-key="t-widgets">Slide</span>
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link menu-link" href="{{ url('/admin/settings') }}">
                     <i class="mdi mdi-cog"></i> <span data-key="t-widgets">Ayarlar</span>
                 </a>
             </li>
+            <!-- <li class="nav-item">
+                <a class="nav-link menu-link" href="{{ route('admin.slides.index') }}">
+                    <i class="mdi mdi-image-multiple"></i> <span data-key="t-widgets">Slide Yönetimi</span>
+                </a>
+            </li>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link menu-link" href="{{ route('admin.references.index') }}">
+                    <i class="mdi mdi-account-group"></i> <span data-key="t-widgets">Referans Yönetimi</span>
+                </a>
+            </li> -->
 {{--            <li class="nav-item">--}}
 {{--                <a class="nav-link menu-link" href="{{ url('/admin/products') }}">--}}
 {{--                    <i class="mdi mdi-view-grid-outline"></i> <span data-key="t-widgets">Ürünler</span>--}}

@@ -1,20 +1,18 @@
-{{-- Bu dosya hem yeni kayıt hem de düzenleme formlarında kullanılacak. --}}
-{{-- Değişken adını $blog yerine daha jenerik olan $item yapıyoruz. --}}
-
 @csrf
 <div class="mb-3">
-    <label class="form-label" for="title">Başlık</label>
-    <input type="text" class="form-control" name="title" value="{{ old('title', $item->title ?? '') }}" required>
+    <label class="form-label" for="{{ $editorId }}_title">Başlık</label>
+    <input type="text" class="form-control" id="{{ $editorId }}_title" name="title" value="{{ old('title', $item->title ?? '') }}" required>
 </div>
 
 <div class="mb-3">
-    <label for="image" class="form-label">Görsel</label>
-    <input type="file" class="form-control" name="image">
-
-    {{-- JavaScript'in bu bölümü bulup görseli içine koyması için bir yer tutucu --}}
+    <label for="{{ $editorId }}_image" class="form-label">Görsel</label>
+    <input type="file" class="form-control" name="image" id="{{ $editorId }}_image">
+    
+    {{-- GÜNCELLENDİ: JavaScript'in bulabilmesi için standart ID'ler eklendi --}}
     <div id="image-preview-container" class="mt-2" style="display: none;">
         <label class="form-label">Mevcut Görsel</label>
         <div>
+            {{-- GÜNCELLENDİ: ID statik hale getirildi ve src temizlendi (JS dolduracak) --}}
             <img id="image-preview" src="" alt="Mevcut Görsel" class="img-thumbnail" style="max-width: 150px;">
         </div>
     </div>
@@ -72,5 +70,5 @@
 
 <div class="mb-3">
     <label for="content" class="form-label">İçerik</label>
-    {{-- TinyMCE editörleri için ID'lerin benzersiz olması önemlidir. --}}
-    <textarea id="{{ $editorId }}" class="tinymce-editor" name="content">{{ old('content', $item->content ?? '') }}</textarea></div>
+    <textarea id="{{ $editorId }}" class="summernote-editor" name="content">{{ old('content', $item->content ?? '') }}</textarea>
+</div>

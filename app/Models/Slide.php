@@ -4,37 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\File; // << BU SATIRI EKLE
 
 class Slide extends Model
 {
     use HasFactory;
-
+    
+    // Toplu atama (Mass Assignment) için izin verilen alanlar
     protected $fillable = [
         'title',
         'subtitle',
-        'image_url',
         'link',
+        'button_text',
+        'image_url',
         'order',
         'status',
     ];
-
+    
+    // Genellikle 'status' alanı boolean olarak tanımlanır
     protected $casts = [
         'status' => 'boolean',
     ];
-
-    protected static function booted(): void
+    
+    /**
+     * Global Scope: Varsayılan olarak sıralamaya göre sıralar.
+     */
+    protected static function booted()
     {
-        static::deleting(function (Slide $slide) {
-            if ($slide->image_url) {
-                // Controller'da tanımladığımız boyutları ve yolu burada da kullanıyoruz.
-                $imageService = app(ImageService::class);
-                $sizes = ['1920x1080', '128x128'];
-                $path = 'slide-images';
-                $imageService->deleteImages($slide->image_url, $path, $sizes);
-            }
+        static::addGlobalScope('ordered', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            $builder->orderBy('order');
         });
     }
-
-
 }

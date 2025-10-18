@@ -6,6 +6,7 @@
  * @param {object} options - Modüle özel ayarları içeren obje.
  * Örn: { modelName: 'blogs', createFormId: '#createblogForm', ... }
  */
+import { syncSummernote } from './summernote-handler.js';
 export function initAjaxFormHandlers(options) {
     const { modelName, createFormId, createModalId, editFormId, editModalId, csrfToken } = options;
 
@@ -15,12 +16,12 @@ export function initAjaxFormHandlers(options) {
         createForm.addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
-            // TinyMCE içeriğini ekle (varsa)
-            const createEditor = tinymce.get(options.createEditorId || 'content');
-            if (createEditor) {
-                const fieldName = createEditor.getElement().getAttribute('name');
-                formData.set(fieldName, createEditor.getContent());
-            }
+
+            // TinyMCE içeriğini ekle (varsa) - VARLIK KONTROLÜ EKLENDİ
+          if (options.editorType === 'summernote') {
+            syncSummernote(formId);
+        }
+
             // AJAX isteğini gönder
             submitAjaxForm(this.action, 'POST', formData, csrfToken, createFormId);
         });
@@ -33,12 +34,16 @@ export function initAjaxFormHandlers(options) {
             e.preventDefault();
             const formData = new FormData(this);
             formData.append('_method', 'PUT');
-            // TinyMCE içeriğini ekle (varsa)
-            const editEditor = tinymce.get(options.editEditorId || 'editContent');
-            if (editEditor) {
-                const fieldName = editEditor.getElement().getAttribute('name');
-                formData.set(fieldName, editEditor.getContent());
+
+            // TinyMCE içeriğini ekle (varsa) - VARLIK KONTROLÜ EKLENDİ
+            if (typeof tinymce !== 'undefined') {
+                const editEditor = tinymce.get(options.editEditorId || 'editContent');
+                if (editEditor) {
+                    const fieldName = editEditor.getElement().getAttribute('name');
+                    formData.set(fieldName, editEditor.getContent());
+                }
             }
+
             // AJAX isteğini gönder
             submitAjaxForm(this.action, 'POST', formData, csrfToken, editFormId);
         });

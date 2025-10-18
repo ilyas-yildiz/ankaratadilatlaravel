@@ -23,3 +23,4 @@ Thumbs.db
 /public/theme
 !/public/theme/css/custom.css
 /vendor
+.bundle

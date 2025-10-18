@@ -47,11 +47,13 @@ return [
             'report' => false,
         ],
 
+        // BURASI GÜNCELLENDİ
         'public_folder' => [
             'driver' => 'local',
+            // Fiziksel olarak dosyaların kaydedileceği yer (public/storage/uploads) - BU DOĞRU
             'root' => public_path('storage/uploads'),
-            // URL'e '/public' segmentini ekleyerek sorunu çözüyoruz.
-            'url' => env('APP_URL').'/public/storage/uploads',
+            // DÜZELTİLDİ: Tarayıcının dosyaya erişeceği URL. Gereksiz '/public' segmenti kaldırıldı.
+            'url' => env('APP_URL').'/storage/uploads',
             'visibility' => 'public',
         ],
 

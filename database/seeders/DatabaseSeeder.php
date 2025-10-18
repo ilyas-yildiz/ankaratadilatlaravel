@@ -21,10 +21,12 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'), // 'password' kelimesini güvenli bir şekilde hash'leyelim
         ]);
         $this->call([
+            UserSeeder::class,
             CategorySeeder::class,
             GallerySeeder::class,
             BlogSeeder::class,
-
+            UpdateBlogsTableSeeder::class,
+            SettingsTableSeeder::class,
         ]);
 
 

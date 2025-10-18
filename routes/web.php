@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\GalleryItemController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\AuthorController;
 use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\SlideController; // << YENİ EKLENEN SATIR
 use App\Http\Middleware\RedirectIfLoggedIn;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FrontendController;
@@ -21,11 +20,10 @@ use App\Http\Controllers\FrontendController;
 */
 Route::name('frontend.')->group(function () {
     Route::get('/', [FrontendController::class, 'index'])->name('home');
-    Route::get('/hakkimizda', [FrontendController::class, 'about'])->name('about');
-    Route::get('/hizmetlerimiz', [FrontendController::class, 'services'])->name('service');
-    Route::get('/projelerimiz', [FrontendController::class, 'projects'])->name('project');
-    Route::get('/blog', [FrontendController::class, 'blogs'])->name('blog'); // Blog listeleme sayfası
-    Route::get('/iletisim', [FrontendController::class, 'contact'])->name('contact');
+    Route::get('/kategori/{slug}', [FrontendController::class, 'category'])->name('category');
+    Route::get('/haber/{slug}', [FrontendController::class, 'blogDetail'])->name('blog.detail');
+    Route::get('/yazarlar', [FrontendController::class, 'authors'])->name('author');
+    Route::get('/yazar/{slug}', [FrontendController::class, 'authorDetail'])->name('author.detail');
 });
 
 /*
@@ -50,30 +48,23 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function () {
 
-        // --- YÖNETİLEBİLİR ANA MODÜLLER (Resource Controllers) ---
-        // Yeni bir modül eklemek için sadece bu diziye eklemeniz yeterli!
         $resourceControllers = [
             'categories' => CategoryController::class,
             'galleries'  => GalleryController::class,
             'blogs'      => BlogController::class,
             'authors'    => AuthorController::class,
-            'products'   => ProductController::class, // 2. Product modülünü diziye ekle
-            'slides'     => SlideController::class, // << YENİ EKLENEN SATIR
+            'products'   => ProductController::class,
         ];
 
         foreach ($resourceControllers as $name => $controller) {
             Route::resource($name, $controller);
         }
 
-        // --- ORTAK İŞLEM ROTALARI ---
         Route::patch('{model}/{id}/status', [CommonController::class, 'updateStatus'])->name('common.updateStatus');
         Route::post('{model}/update-order', [CommonController::class, 'updateOrder'])->name('common.updateOrder');
         Route::post('{model}/bulk-delete', [CommonController::class, 'bulkDestroy'])->name('common.bulkDestroy');
         Route::post('common/upload-image', [CommonController::class, 'uploadImage'])->name('common.uploadImage');
 
-        // --- MODÜLE ÖZEL ROTALAR ---
-
-        // Galeri Modülü Özel Rotaları
         Route::post('/galleries/{gallery}/items', [GalleryItemController::class, 'store'])->name('galleries.items.store');
         Route::delete('galleries/items/{galleryItem}', [GalleryItemController::class, 'destroy'])->name('galleries.items.destroy');
         Route::put('galleries/{gallery}/cover-image', [GalleryController::class, 'updateCoverImage'])->name('galleries.updateCoverImage');
@@ -83,7 +74,8 @@ Route::middleware('auth')->group(function () {
         Route::get('blogs/ai/new-chat', [BlogController::class, 'startNewAiChat'])->name('blogs.startNewAiChat');
         Route::post('blogs/ai/generate', [BlogController::class, 'generateWithAi'])->name('blogs.generateWithAi');
         Route::post('blogs/ai/prepare', [BlogController::class, 'prepareFromAi'])->name('blogs.prepareFromAi');
-        Route::get('blogs/{blog}/edit-content', [BlogController::class, 'editContent'])->name('blogs.editContent');
+        // AŞAĞIDAKİ SATIR KALDIRILDI
+        // Route::get('blogs/{blog}/edit-content', [BlogController::class, 'editContent'])->name('blogs.editContent');
         Route::post('blogs/ai/save-chat', [BlogController::class, 'saveCurrentChat'])->name('blogs.saveAiChat');
         Route::get('blogs/ai/load-chat/{chat}', [BlogController::class, 'loadChat'])->name('blogs.loadAiChat');
         Route::delete('blogs/ai/delete-chat/{chat}', [BlogController::class, 'destroyAiChat'])->name('blogs.destroyAiChat');
@@ -91,14 +83,13 @@ Route::middleware('auth')->group(function () {
             \UniSharp\LaravelFilemanager\Lfm::routes();
         });
 
-        // Ayarlar Modülü Rotaları
         Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
-
+        
+        Route::resource('slides', App\Http\Controllers\Admin\SlideController::class);
+        Route::resource('references', App\Http\Controllers\Admin\ReferenceController::class);
     });
 });
-
-// burası admin prefix'inin dışında. direk ana url sonrası eklenecek urller. Sonradan Silinecek route'lar (sunucuda terminal çalıştıramadığımız için bunları buradan çözmek durumundayız.)
 
 Route::get('/sistemi-temizle-12345', function() {
     try {
@@ -114,11 +105,7 @@ Route::get('/sistemi-temizle-12345', function() {
 
 Route::get('/run-user-seeder-a1b2c3d4e5f6', function () {
     try {
-        // Seeder'ı çalıştırmanın en temiz yolu Artisan::call kullanmaktır.
-        Artisan::call('db:seed', [
-            '--class' => 'UserSeeder',
-            '--force' => true // Prodüksiyon ortamında onaya gerek kalmadan çalıştırır.
-        ]);
+        Artisan::call('db:seed', ['--class' => 'UserSeeder', '--force' => true]);
         return 'UserSeeder başarıyla çalıştırıldı.';
     } catch (\Exception $e) {
         return 'Hata: ' . $e->getMessage();
@@ -132,9 +119,4 @@ Route::get('/migrate-now', function() {
     } catch (Exception $e) {
         return 'Hata oluştu: ' . $e->getMessage();
     }
-});
-
-Route::get('/tree', function () {
-    $path = base_path('public/theme');
-    return "<pre>" . \App\Helpers\DirectoryTree::getTree($path) . "</pre>";
 });

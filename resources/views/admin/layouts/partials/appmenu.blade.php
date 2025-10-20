@@ -54,6 +54,11 @@
                 <i class="mdi mdi-information-outline"></i> <span data-key="t-widgets">Hakkımızda</span> 
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link menu-link" href="{{ route('admin.services.index') }}">
+                <i class="mdi mdi-toolbox-outline"></i> <span data-key="t-widgets">Hizmetler</span> 
+            </a>
+        </li>
             <li class="nav-item">
                 <a class="nav-link menu-link" href="{{ url('/admin/authors') }}">
                     <i class="mdi mdi-account-tie"></i> <span data-key="t-widgets">Köşe Yazarları</span>

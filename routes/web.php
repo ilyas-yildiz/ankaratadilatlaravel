@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Middleware\RedirectIfLoggedIn;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\Admin\AboutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,7 @@ Route::middleware('auth')->group(function () {
             'blogs'      => BlogController::class,
             'authors'    => AuthorController::class,
             'products'   => ProductController::class,
+            'abouts'     => AboutController::class, // YENİ SATIRI EKLE
         ];
 
         foreach ($resourceControllers as $name => $controller) {

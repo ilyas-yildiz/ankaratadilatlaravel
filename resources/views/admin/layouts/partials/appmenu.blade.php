@@ -50,6 +50,11 @@
                 </a>
             </li>
             <li class="nav-item">
+            <a class="nav-link menu-link" href="{{ route('admin.abouts.index') }}">
+                <i class="mdi mdi-information-outline"></i> <span data-key="t-widgets">Hakkımızda</span> 
+            </a>
+        </li>
+            <li class="nav-item">
                 <a class="nav-link menu-link" href="{{ url('/admin/authors') }}">
                     <i class="mdi mdi-account-tie"></i> <span data-key="t-widgets">Köşe Yazarları</span>
                 </a>

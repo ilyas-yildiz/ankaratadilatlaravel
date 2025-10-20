@@ -24,3 +24,5 @@ Thumbs.db
 !/public/theme/css/custom.css
 /vendor
 .bundle
+bootstrap/cache/*.php
+/public/storage

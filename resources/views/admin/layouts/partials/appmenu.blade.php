@@ -59,6 +59,11 @@
                 <i class="mdi mdi-toolbox-outline"></i> <span data-key="t-widgets">Hizmetler</span> 
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link menu-link" href="{{ route('admin.projects.index') }}">
+                <i class="mdi mdi-briefcase-variant-outline"></i> <span data-key="t-widgets">Projeler</span>
+            </a>
+        </li>
             <li class="nav-item">
                 <a class="nav-link menu-link" href="{{ url('/admin/authors') }}">
                     <i class="mdi mdi-account-tie"></i> <span data-key="t-widgets">Köşe Yazarları</span>

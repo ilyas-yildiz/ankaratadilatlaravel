@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Başarılıysa JSON verisini döndür
             return await response.json();
         } catch (error) {
+            // Hata logunu konsola yazdır (geliştirme için faydalı olabilir)
             console.error('Fetch Error:', error);
             iziToast.error({ title: 'Hata!', message: error.message, position: 'topRight' });
             return null; // Hata durumunda null döndür
@@ -201,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- 5. DÜZENLEME MODALI VERİ DOLDURMA (SON GÜNCELLEME) ---
+    // --- 5. DÜZENLEME MODALI VERİ DOLDURMA ---
     const editModalEl = document.getElementById('editModal');
     if (editModalEl) {
         // Modal açılmaya başladığında çalışır (veriyi çekmek için ideal)
@@ -211,13 +212,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const updateUrl = button.dataset.updateUrl; // Formun action URL'si
             const form = editModalEl.querySelector('#editForm'); // Modal içindeki form
             form.action = updateUrl; // Formun action'ını ayarla
-            form.reset(); // Formu temizle (önceki verilerden kalan olmasın)
+            form.reset(); // Formu temizle
 
-            // Görsel önizlemesini gizle
+            // Görsel önizlemesini gizle ve temizle
             const imagePreviewContainer = form.querySelector('#image-preview-container');
             if (imagePreviewContainer) imagePreviewContainer.style.display = 'none';
             const imagePreview = form.querySelector('#image-preview');
-            if (imagePreview) imagePreview.src = ''; // Önizleme src'sini temizle
+            if (imagePreview) imagePreview.src = '';
 
             // Summernote'u sıfırla (eğer varsa)
             const editorTextarea = form.querySelector('.summernote-editor');
@@ -234,21 +235,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Gelen verideki her anahtar için formu doldur
                 Object.keys(item).forEach(key => {
-                    // Checkbox/Switch için özel seçici (önceki hatayı düzelten)
+                    // Checkbox/Switch için özel seçici
                     const field = form.querySelector(`input[type="checkbox"][name="${key}"]`) || form.querySelector(`[name="${key}"]`);
 
                     if (field) {
-                        // Alanın Summernote olup olmadığını kontrol et
                         if (field.classList.contains('summernote-editor')) {
-                            // Bu alanı aşağıdaki özel kod dolduracak, şimdilik atla
+                            // Summernote'u aşağıda dolduracağız, atla
+                        } else if (field.type === 'date') {
+                            // Tarih inputunu YYYY-MM-DD formatıyla doldur
+                            if (item[key] && typeof item[key] === 'string') {
+                                field.value = item[key].substring(0, 10);
+                            } else {
+                                field.value = null;
+                            }
                         } else if (field.type === 'checkbox') {
                             field.checked = item[key] == 1; // Değer 1 ise işaretle
                         } else if (field.tagName === 'SELECT') {
-                            // Select kutusu için değeri ayarla
-                            field.value = item[key];
+                            field.value = item[key]; // Select kutusunu doldur
                         } else {
-                            // Diğer input/textarea'lar için değeri ayarla
-                            field.value = item[key];
+                            field.value = item[key]; // Diğer input/textarea'ları doldur
                         }
                     }
                 });
@@ -261,7 +266,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Summernote içeriğini ayarla (eğer varsa ve veri 'content' anahtarında ise)
                 if (editorTextarea && item.content !== undefined && $.fn.summernote) {
-                    // Editörün ID'sini kullanarak içeriği bas
                     $('#' + editorTextarea.id).summernote('code', item.content);
                 }
             }
@@ -284,14 +288,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // AJAX isteğini gönder
         const response = await fetchRequest(url, {
-            method: 'POST', // PUT/PATCH için _method gizli alanı formda olmalı veya burada eklenebilir
+            method: 'POST', // PUT/PATCH için _method gizli alanı formda olmalı
             body: formData
         });
 
         // Başarılıysa modalı kapat, bildirim göster ve sayfayı yenile
         if (response && response.success) {
             const modalEl = form.closest('.modal');
-            // Modal instance'ını güvenli bir şekilde alıp kapat
             const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if (modalInstance) {
                 modalInstance.hide();
@@ -306,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('createForm')?.addEventListener('submit', handleFormSubmit);
     document.getElementById('editForm')?.addEventListener('submit', handleFormSubmit);
 
-    // Modal kapandığında Summernote içeriğini temizle (isteğe bağlı ama önerilir)
+    // Modal kapandığında Summernote içeriğini temizle
     $('#createModal, #editModal').on('hidden.bs.modal', function () {
         const summernoteTextarea = $(this).find('.summernote-editor');
         if (summernoteTextarea.length && $.fn.summernote) {

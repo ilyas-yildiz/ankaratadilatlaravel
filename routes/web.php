@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,7 @@ Route::middleware('auth')->group(function () {
             'products'   => ProductController::class,
             'abouts'     => AboutController::class,
             'services'   => ServiceController::class,
+            'projects'   => ProjectController::class,
         ];
 
         foreach ($resourceControllers as $name => $controller) {

@@ -1,12 +1,14 @@
 services:
     laravel.test:
         build:
-            context: ./vendor/laravel/sail/runtimes/8.4
+            # GÜNCELLENDİ: PHP 8.3 runtime'ını kullanmak için yolu değiştir.
+            context: ./vendor/laravel/sail/runtimes/8.3
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
                 MYSQL_CLIENT: mariadb-client
-        image: sail-8.4/app
+        # GÜNCELLENDİ: İmaj adını da 8.3'e göre değiştirmek iyi bir pratik.
+        image: sail-8.3/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -48,15 +50,7 @@ services:
                 - '--innodb_initialized'
             retries: 3
             timeout: 5s
-            # YENİ EKLENEN KISIM BAŞLANGICI
-    adminer:
-        image: adminer
-        restart: always
-        ports:
-            - 8080:8080
-        networks:
-            - sail
-    # YENİ EKLENEN KISIM SONU
+            # NOT: Ofisteki adminer bloğu burada yok, doğru.
 networks:
     sail:
         driver: bridge

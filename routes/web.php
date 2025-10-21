@@ -23,10 +23,17 @@ use App\Http\Controllers\Admin\ProjectController;
 */
 Route::name('frontend.')->group(function () {
     Route::get('/', [FrontendController::class, 'index'])->name('home');
-    Route::get('/kategori/{slug}', [FrontendController::class, 'category'])->name('category');
-    Route::get('/haber/{slug}', [FrontendController::class, 'blogDetail'])->name('blog.detail');
-    Route::get('/yazarlar', [FrontendController::class, 'authors'])->name('author');
-    Route::get('/yazar/{slug}', [FrontendController::class, 'authorDetail'])->name('author.detail');
+
+    // YENİ EKLENEN ROTA
+    Route::get('/hakkimizda', [FrontendController::class, 'about'])->name('about');
+
+    // Diğer frontend rotaları (header'da kullandıklarımız)
+    Route::get('/hizmetlerimiz', [FrontendController::class, 'services'])->name('services');
+    Route::get('/projelerimiz', [FrontendController::class, 'projects'])->name('projects');
+    Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index');
+    // Blog detay rotası (slug parametresiyle)
+    Route::get('/blog/{slug}', [FrontendController::class, 'blogDetail'])->name('blog.detail');
+    Route::get('/iletisim', [FrontendController::class, 'contact'])->name('contact');
 });
 
 /*
@@ -53,13 +60,13 @@ Route::middleware('auth')->group(function () {
 
         $resourceControllers = [
             'categories' => CategoryController::class,
-            'galleries'  => GalleryController::class,
-            'blogs'      => BlogController::class,
-            'authors'    => AuthorController::class,
-            'products'   => ProductController::class,
-            'abouts'     => AboutController::class,
-            'services'   => ServiceController::class,
-            'projects'   => ProjectController::class,
+            'galleries' => GalleryController::class,
+            'blogs' => BlogController::class,
+            'authors' => AuthorController::class,
+            'products' => ProductController::class,
+            'abouts' => AboutController::class,
+            'services' => ServiceController::class,
+            'projects' => ProjectController::class,
         ];
 
         foreach ($resourceControllers as $name => $controller) {
@@ -91,13 +98,13 @@ Route::middleware('auth')->group(function () {
 
         Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
-        
+
         Route::resource('slides', App\Http\Controllers\Admin\SlideController::class);
         Route::resource('references', App\Http\Controllers\Admin\ReferenceController::class);
     });
 });
 
-Route::get('/sistemi-temizle-12345', function() {
+Route::get('/sistemi-temizle-12345', function () {
     try {
         Artisan::call('cache:clear');
         Artisan::call('config:clear');
@@ -118,7 +125,7 @@ Route::get('/run-user-seeder-a1b2c3d4e5f6', function () {
     }
 });
 
-Route::get('/migrate-now', function() {
+Route::get('/migrate-now', function () {
     try {
         Artisan::call('migrate', ['--force' => true]);
         return 'Veritabanı başarıyla güncellendi!';

@@ -2,198 +2,77 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\About; // About modelini kullanacağız
+use App\Models\Service; // Hizmetler listesi için Service modelini kullanacağız
+use App\Models\Blog; // Footer'daki son yazılar için Blog modelini kullanacağız
 use Illuminate\Http\Request;
-use App\Models\Blog;
-use App\Models\Category;
-use App\Models\Author;
-
+use Illuminate\Support\Facades\View; // View::share için (opsiyonel ama kullanışlı)
 
 class FrontendController extends Controller
 {
-    /**
-     * Anasayfayı gösterir.
-     */
+    // Anasayfa metodu (varsa kalsın)
     public function index()
     {
-        // --- 1. Manşet Haberlerini Çekme (Mevcut Kod) ---
-        $featuredBlogs = Blog::where('is_featured', true)
-            ->where('status', true)
-            ->latest()
-            ->limit(5)
-            ->get();
-
-        $mainFeatured = $featuredBlogs->first();
-        $subFeatured = $featuredBlogs->slice(1);
-
-        // Manşetteki haberlerin ID'lerini bir dizide toplayalım ki tekrar göstermeyelim.
-        $featuredBlogIds = $featuredBlogs->pluck('id');
-
-
-        // --- 2. Kategori Haberlerini Çekme (Yeni Kod) ---
-        // Anasayfada gösterilecek, durumu aktif olan kategorileri çekiyoruz.
-        $categoriesWithBlogs = Category::where('status', true)
-            ->where('type', 'blog')
-            ->orderBy('order', 'asc')
-            ->with(['blogs' => function ($query) use ($featuredBlogIds) {
-                // Her bir kategori için, ilişkili blogları şu kurallarla çek:
-                $query->where('status', true)
-                    // Manşette gösterilen haberleri HARİÇ TUT
-                    ->whereNotIn('id', $featuredBlogIds)
-                    ->latest() // En yeniden eskiye sırala
-                    ->limit(5); // Sadece 5 tane al
-            }])
-            ->get()
-            // Sadece içinde en az 1 haber olan kategorileri al
-            ->filter(function ($category) {
-                return $category->blogs->isNotEmpty();
-            });
-
-        // Kategorileri ikişerli gruplara ayıralım (view'da kolaylık için)
-        $categoryChunks = $categoriesWithBlogs->chunk(2);
-
-
-        $sidebarAuthors = Author::where('status', true)
-            ->orderBy('order', 'asc')
-            ->limit(5) // Yan barda gösterilecek yazar sayısını 5 ile sınırlayalım.
-            ->get();
-
-        // --- 4. SON DAKİKA BARI İÇİN HABERLERİ ÇEKME (YENİ KOD) ---
-        // Durumu aktif olan ve manşette GÖSTERİLMEYEN en son 10 haberi çekiyoruz.
-        $tickerBlogs = Blog::where('status', true)
-            ->whereNotIn('id', $featuredBlogIds)
-            ->latest()
-            ->limit(10)
-            ->get();
-
-        // --- 5. Tüm Verileri View'a Gönderme ---
-        return view('frontend.pages.home', compact(
-            'mainFeatured',
-            'subFeatured',
-            'categoryChunks',
-            'sidebarAuthors',
-            'tickerBlogs' // Yeni değişkeni view'a gönderiyoruz
-        ));
-
-        // --- 4. Tüm Verileri View'a Gönderme ---
-        return view('frontend.pages.home', compact(
-            'mainFeatured',
-            'subFeatured',
-            'categoryChunks',
-            'sidebarAuthors' // Yeni değişkeni view'a gönderiyoruz
-        ));
+        // Anasayfa için gerekli verileri çekip view'ı döndür...
+        return view('frontend.pages.home'); // Örnek
     }
 
-    public function category($slug)
+    // YENİ METOT: Hakkımızda sayfası
+    public function about()
     {
-        // 1. ANA İÇERİK: Mevcut kategoriyi ve ona ait haberleri çek (Sayfalanmış)
-        $category = Category::where('slug', $slug)->where('status', true)->firstOrFail();
-        $blogs = $category->blogs()
-            ->where('status', true)
-            ->latest()
-            ->paginate(10);
+        // Veritabanından Hakkımızda içeriğini çek (genellikle ilk veya tek kayıt)
+        $aboutData = About::where('status', true)->first(); // Aktif olan ilk kaydı al
 
-        // 2. YAN BAR İÇERİĞİ (YENİ KOD): Tüm kategorileri, aktif haber sayılarıyla birlikte çek
-        // withCount, her bir kategori için 'blogs' ilişkisindeki aktif haber sayısını sayar
-        // ve bunu 'blogs_count' adında bir özelliğe ekler.
-        $sidebarCategories = Category::where('status', true)
-            ->where('type', 'blog')
-            ->withCount(['blogs' => function ($query) {
-                $query->where('status', true);
-            }])
-            ->orderBy('order', 'asc')
-            ->get();
+        // "Neler Yapıyoruz?" bölümü için aktif hizmetleri çek (sıralı)
+        $services = Service::where('status', true)->orderBy('order', 'asc')->get();
 
+        // Footer için son 3 blog yazısını çek (Blog modelini ve rotasını varsayarak)
+        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
 
-        // 3. Tüm verileri view'a gönder.
-        return view('frontend.pages.category', compact('category', 'blogs', 'sidebarCategories'));
+        // View::share ile $latestPosts'u tüm view'larda kullanılabilir yapabiliriz
+        // veya sadece bu view'a gönderebiliriz. Şimdilik sadece gönderelim.
+        // View::share('latestPosts', $latestPosts); 
+
+        // Verileri view'a gönder
+        return view('frontend.pages.about', [
+            'about' => $aboutData, // View içinde $about değişkeniyle erişilecek
+            'services' => $services, // View içinde $services değişkeniyle erişilecek
+            'latestPosts' => $latestPosts, // Footer partial'ı için
+        ]);
     }
 
-    /**
-     * Yazarlar sayfasını gösterir.
-     */
-    public function authors()
+    // Blog listesi metodu (varsa kalsın)
+    public function blogIndex()
     {
-        // Durumu aktif olan tüm yazarları 'order' sütununa göre sıralayarak çek.
-        $authors = Author::where('status', true)
-            ->orderBy('order', 'asc')
-            ->get();
-
-        // Çektiğimiz yazar verilerini 'frontend.pages.authors' view'ına gönder.
-        return view('frontend.pages.author', compact('authors'));
+        $posts = Blog::where('status', true)->latest()->paginate(10); // Örnek
+        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
+        return view('frontend.pages.blog.index', compact('posts', 'latestPosts'));
     }
 
-    public function authorDetail($slug)
-    {
-        // 1. URL'den gelen slug'a göre yazarı bul. Eğer bulunamazsa 404 hatası ver.
-        $author = Author::where('slug', $slug)->firstOrFail();
-
-        // 2. Bu yazara ait olan, durumu aktif olan blogları en yeniden eskiye sırala
-        //    ve sayfalama uygula (sayfa başına 10 haber).
-        // NOT: Bu kodun çalışması için Blog modelinde author_id sütunu olmalı
-        // ve Author modelinde blogs() ilişkisi tanımlı olmalı.
-        $blogs = $author->blogs()
-            ->where('status', true)
-            ->latest()
-            ->paginate(10);
-
-        // a) Tüm kategorileri, aktif haber sayılarıyla birlikte çek.
-        $sidebarCategories = Category::where('status', true)
-            ->where('type', 'blog')
-            ->withCount(['blogs' => function ($query) {
-                $query->where('status', true);
-            }])
-            ->orderBy('order', 'asc')
-            ->get();
-
-        // b) Yan barda gösterilecek yazarları çek.
-        $sidebarAuthors = Author::where('status', true)
-            ->orderBy('order', 'asc')
-            ->limit(5)
-            ->get();
-
-        // 3. Bulunan yazar ve blog verilerini view'a gönder.
-        return view('frontend.pages.author_detail', compact('author', 'blogs', 'sidebarCategories',
-            'sidebarAuthors'));
-    }
-
+    // Blog detay metodu (varsa kalsın)
     public function blogDetail($slug)
     {
-        // 1. Haberi slug'ına göre bul. Durumu aktif olmalı. İlişkili verileri (kategori, yazar) de birlikte çek.
-        $blog = Blog::with(['category', 'author', 'user'])
-            ->where('slug', $slug)
-            ->where('status', true)
-            ->firstOrFail();
-
-        // 2. "Bunları da Beğenebilirsiniz" bölümü için, aynı kategorideki diğer 4 haberi çek.
-        $relatedBlogs = Blog::where('category_id', $blog->category_id)
-            ->where('id', '!=', $blog->id) // Mevcut haberi hariç tut
-            ->where('status', true)
-            ->latest()
-            ->limit(4)
-            ->get();
-
-        // 3. YAN BAR İÇERİĞİ (YENİ KOD)
-        // a) Tüm kategorileri, aktif haber sayılarıyla birlikte çek.
-        $sidebarCategories = Category::where('status', true)
-            ->where('type', 'blog')
-            ->withCount(['blogs' => function ($query) {
-                $query->where('status', true);
-            }])
-            ->orderBy('order', 'asc')
-            ->get();
-
-        // b) Yan barda gösterilecek yazarları çek.
-        $sidebarAuthors = Author::where('status', true)
-            ->orderBy('order', 'asc')
-            ->limit(5)
-            ->get();
-
-        // 4. Tüm verileri view'a gönder.
-        return view('frontend.pages.blog_detail', compact(
-            'blog',
-            'relatedBlogs',
-            'sidebarCategories',
-            'sidebarAuthors'
-        ));
+        $post = Blog::where('slug', $slug)->where('status', true)->firstOrFail();
+        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
+        return view('frontend.pages.blog.detail', compact('post', 'latestPosts'));
     }
+
+    // Diğer frontend metodları... (hizmetler, projeler, iletişim vb.)
+    public function services()
+    {
+        // Varsayılan: Hizmetler view'ı pages altında
+        return view('frontend.pages.services');
+    }
+    public function projects()
+    {
+        // Varsayılan: Projeler view'ı pages altında
+        return view('frontend.pages.projects');
+    }
+    public function contact()
+    {
+        // Varsayılan: İletişim view'ı pages altında
+        return view('frontend.pages.contact');
+    }
+
+
 }

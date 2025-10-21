@@ -22,6 +22,7 @@ Homestead.yaml
 Thumbs.db
 /public/theme
 !/public/theme/css/custom.css
+/public/atd_frontend_theme
 /vendor
 .bundle
 bootstrap/cache/*.php

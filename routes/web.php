@@ -33,8 +33,7 @@ Route::name('frontend.')->group(function () {
     Route::get('/hizmetlerimiz/{slug}', [FrontendController::class, 'serviceDetail'])->name('services.detail'); // Detay sayfası
     Route::get('/projelerimiz', [FrontendController::class, 'projectsIndex'])->name('projects'); // Liste sayfası
     Route::get('/projelerimiz/{slug}', [FrontendController::class, 'projectDetail'])->name('projects.detail'); // Detay sayfası
-    Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index');
-    // Blog detay rotası (slug parametresiyle)
+    Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index'); // Liste
     Route::get('/blog/{slug}', [FrontendController::class, 'blogDetail'])->name('blog.detail');
     Route::get('/iletisim', [FrontendController::class, 'contact'])->name('contact');
 });

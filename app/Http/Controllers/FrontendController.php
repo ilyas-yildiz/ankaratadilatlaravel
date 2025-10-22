@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\About;
 use App\Models\Service;
 use App\Models\Blog;
+use App\Models\Category;
 use App\Models\Project;
 use App\Models\Slide;
 use App\Models\Gallery;
@@ -78,17 +79,50 @@ class FrontendController extends Controller
     }
 
     // Blog listesi metodu (varsa kalsın)
-    public function blogIndex()
+public function blogIndex()
     {
-        $posts = Blog::where('status', true)->latest()->paginate(10); // Örnek
-        return view('frontend.pages.blog.index', compact('posts'));
+        // Aktif blog yazılarını en yeniden eskiye doğru sayfalı olarak çek
+        // Örneğin, sayfa başına 10 yazı gösterelim
+        $posts = Blog::where('status', true)->latest()->paginate(10); 
+
+        // Sidebar için son yazılar (footer'dakiyle aynı olabilir)
+        $latestPostsSidebar = Blog::where('status', true)->latest()->take(5)->get(); // Sidebar için 5 tane alalım
+
+        // Sidebar için kategoriler (Blog modelinde category ilişkisi varsa)
+        // $categories = Category::where('status', true)->where('type', 'blog')->orderBy('order', 'asc')->get();
+
+        return view('frontend.pages.blogs.index', compact('posts', 'latestPostsSidebar'/*, 'categories'*/));
     }
 
-    // Blog detay metodu (varsa kalsın)
+    // GÜNCELLENDİ: Blog Detay Sayfası
     public function blogDetail($slug)
     {
+        // Slug'a göre aktif yazıyı bul
         $post = Blog::where('slug', $slug)->where('status', true)->firstOrFail();
-        return view('frontend.pages.blog.detail', compact('post'));
+
+        // Önceki yazı (mevcut yazıdan daha eski olan ilk yazı)
+        $previousPost = Blog::where('status', true)
+                            ->where('created_at', '<', $post->created_at)
+                            ->orderBy('created_at', 'desc')
+                            ->first();
+
+        // Sonraki yazı (mevcut yazıdan daha yeni olan ilk yazı)
+        $nextPost = Blog::where('status', true)
+                        ->where('created_at', '>', $post->created_at)
+                        ->orderBy('created_at', 'asc')
+                        ->first();
+
+        // Önerilen yazılar (mevcut yazı ve önceki/sonraki hariç, rastgele 3 tane)
+        $suggestedPosts = Blog::where('status', true)
+                            ->where('id', '!=', $post->id) // Mevcut yazı hariç
+                            ->when($previousPost, fn($q) => $q->where('id', '!=', $previousPost->id)) // Önceki hariç (varsa)
+                            ->when($nextPost, fn($q) => $q->where('id', '!=', $nextPost->id)) // Sonraki hariç (varsa)
+                            ->inRandomOrder()
+                            ->take(3)
+                            ->get();
+
+
+        return view('frontend.pages.blogs.detail', compact('post', 'previousPost', 'nextPost', 'suggestedPosts'));
     }
 
  

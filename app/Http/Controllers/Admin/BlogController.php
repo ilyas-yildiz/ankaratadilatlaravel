@@ -32,12 +32,12 @@ class BlogController extends BaseResourceController
             'meta_description' => 'nullable|string|max:255',
             'meta_keywords' => 'nullable|string|max:255'
         ];
-        $rules['image'] = $id ? 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072';
+        $rules['image'] = $id ? 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240';
         return $rules;
     }
     protected function getImageFieldName(): ?string { return 'image'; }
     protected function getImagePath(): ?string { return 'blog-images'; }
-    protected function getImageSizes(): array { return ['1124x790', '562x395', '274x183', '128x128']; }
+    protected function getImageSizes(): array { return ['1460x730', '730x365', '365x182', '128x128']; }
     protected function getAdditionalDataForForms(): array {
         return [
             'categories' => Category::where('status', true)->orderBy('name')->get(),

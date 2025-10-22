@@ -15,6 +15,7 @@ class Project extends Model
     protected $fillable = [
         'order',
         'title',
+        'slug',
         'content',
         'image_url', // Ana görsel eklendi
         'start_date',
@@ -28,10 +29,10 @@ class Project extends Model
     ];
 
     // Tarih alanlarını Carbon nesnesi olarak kullanmak için
-    // protected $casts = [
-    //     'start_date' => 'date',
-    //     'end_date' => 'date',
-    // ];
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
 
     // Ana görselin tam URL'si için accessor
     protected $appends = ['image_full_url'];

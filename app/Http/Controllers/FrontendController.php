@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\Blog;
 use App\Models\Project;
 use App\Models\Slide;
+use App\Models\Gallery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View; // View::share için (opsiyonel ama kullanışlı)
 use Illuminate\Support\Str;
@@ -91,11 +92,34 @@ class FrontendController extends Controller
     }
 
  
-    public function projects()
+public function projectsIndex() 
     {
-        // Varsayılan: Projeler view'ı pages altında
-        return view('frontend.pages.projects');
-        
+        // Tüm aktif projeleri sıralı olarak çek
+        $projects = Project::where('status', true)->orderBy('order', 'asc')->get(); 
+
+        // Proje tiplerini alıp filtreleme için view'a gönderebiliriz (opsiyonel)
+        // $projectTypes = Project::where('status', true)->distinct()->pluck('project_type')->filter()->sort();
+
+        return view('frontend.pages.projects.index', compact('projects'/*, 'projectTypes'*/)); 
+    }
+
+    // YENİ METOT: Proje Detay Sayfası
+    public function projectDetail($slug) 
+    {
+        // Slug'a göre aktif projeyi bul, ilişkili galeriyi de yükle ('with')
+        $project = Project::with('gallery.items') // Galeri ve içindeki item'ları eager load et
+                         ->where('slug', $slug)
+                         ->where('status', true)
+                         ->firstOrFail(); 
+
+        // Benzer (diğer) projeleri çek (şimdilik rastgele 5 tane, mevcut proje hariç)
+        $otherProjects = Project::where('status', true)
+                               ->where('id', '!=', $project->id) // Mevcut projeyi hariç tut
+                               ->inRandomOrder() // Rastgele sırala
+                               ->take(5) // İlk 5 tanesini al
+                               ->get();
+
+        return view('frontend.pages.projects.detail', compact('project', 'otherProjects')); 
     }
     public function contact()
     {

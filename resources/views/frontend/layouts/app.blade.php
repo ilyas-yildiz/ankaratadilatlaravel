@@ -4,6 +4,7 @@
 <head>
     {{-- GÜNCELLENDİ: Partial yolu ve dosya adı --}}
     @include('frontend.partials._head')
+    @stack('slider-styles')
 </head>
 
 <body>
@@ -48,7 +49,7 @@
     </div>
     {{-- GÜNCELLENDİ: Partial yolu ve dosya adı --}}
     @include('frontend.partials._scripts')
-
+    @stack('slider-scripts')
     @stack('custom-scripts')
 
 </body>

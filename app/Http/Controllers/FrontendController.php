@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\About; // About modelini kullanacağız
-use App\Models\Service; // Hizmetler listesi için Service modelini kullanacağız
-use App\Models\Blog; // Footer'daki son yazılar için Blog modelini kullanacağız
+use App\Models\About;
+use App\Models\Service;
+use App\Models\Blog;
+use App\Models\Project;
+use App\Models\Slide;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View; // View::share için (opsiyonel ama kullanışlı)
 
@@ -13,8 +15,19 @@ class FrontendController extends Controller
     // Anasayfa metodu (varsa kalsın)
     public function index()
     {
-        // Anasayfa için gerekli verileri çekip view'ı döndür...
-        return view('frontend.pages.home'); // Örnek
+        $slides = Slide::where('status', true)->orderBy('order', 'asc')->get();
+        // Anasayfada gösterilecek aktif projeleri çek (örneğin son 3 tane, sıralamaya göre)
+        $projects = Project::where('status', true)->orderBy('order', 'asc')->take(3)->get();
+
+        // Footer için son yazılar (varsa)
+        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
+
+        // Verileri view'a gönder
+        return view('frontend.pages.home', [ // View yolunu 'pages' altına aldık
+            'slides' => $slides,
+            'projects' => $projects,
+            'latestPosts' => $latestPosts,
+        ]);
     }
 
     // YENİ METOT: Hakkımızda sayfası

@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- 5. DÜZENLEME MODALI VERİ DOLDURMA ---
+    // --- 5. DÜZENLEME MODALI VERİ DOLDURMA (Sketch Görsel Eklendi) ---
     const editModalEl = document.getElementById('editModal');
     if (editModalEl) {
         // Modal açılmaya başladığında çalışır (veriyi çekmek için ideal)
@@ -214,11 +214,17 @@ document.addEventListener('DOMContentLoaded', function () {
             form.action = updateUrl; // Formun action'ını ayarla
             form.reset(); // Formu temizle
 
-            // Görsel önizlemesini gizle ve temizle
+            // Ana görsel önizlemesini gizle ve temizle
             const imagePreviewContainer = form.querySelector('#image-preview-container');
             if (imagePreviewContainer) imagePreviewContainer.style.display = 'none';
             const imagePreview = form.querySelector('#image-preview');
             if (imagePreview) imagePreview.src = '';
+
+            // Sketch görsel önizlemesini gizle ve temizle
+            const sketchPreviewContainer = form.querySelector('#image_sketch-preview-container'); // Sketch container ID'si
+            if (sketchPreviewContainer) sketchPreviewContainer.style.display = 'none';
+            const sketchPreview = form.querySelector('#image_sketch-preview'); // Sketch image ID'si
+            if (sketchPreview) sketchPreview.src = '';
 
             // Summernote'u sıfırla (eğer varsa)
             const editorTextarea = form.querySelector('.summernote-editor');
@@ -235,6 +241,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Gelen verideki her anahtar için formu doldur
                 Object.keys(item).forEach(key => {
+                    // YENİ: image_sketch_url'i bu döngüde atla, aşağıda özel olarak ele alacağız
+                    if (key === 'image_sketch_url' || key === 'image_sketch_full_url') return;
+
                     // Checkbox/Switch için özel seçici
                     const field = form.querySelector(`input[type="checkbox"][name="${key}"]`) || form.querySelector(`[name="${key}"]`);
 
@@ -258,10 +267,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                // Görsel önizlemesini ayarla (eğer URL varsa)
+                // Ana görsel önizlemesini ayarla (eğer URL varsa)
                 if (item.image_full_url && imagePreviewContainer && imagePreview) {
                     imagePreview.src = item.image_full_url;
                     imagePreviewContainer.style.display = 'block'; // Görseli göster
+                }
+
+                // Sketch görsel önizlemesini ayarla (eğer URL varsa)
+                if (item.image_sketch_full_url && sketchPreviewContainer && sketchPreview) {
+                    sketchPreview.src = item.image_sketch_full_url;
+                    sketchPreviewContainer.style.display = 'block'; // Sketch görselini göster
                 }
 
                 // Summernote içeriğini ayarla (eğer varsa ve veri 'content' anahtarında ise)

@@ -15,6 +15,7 @@ use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\SlideController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +68,7 @@ Route::middleware('auth')->group(function () {
             'abouts' => AboutController::class,
             'services' => ServiceController::class,
             'projects' => ProjectController::class,
+            'slides' => SlideController::class,
         ];
 
         foreach ($resourceControllers as $name => $controller) {

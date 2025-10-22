@@ -126,8 +126,8 @@
                                     </div>
                                     <div class="figcaption bg-gray p-a30">
                                         {{-- Hizmetler sayfasına link eklenebilir --}}
-                                        <h4 class="m-tb0"><a
-                                                href="{{-- route('frontend.service.detail', $service->slug) --}}">{{ $service->title }}</a>
+                                        <h4 class="m-tb0">
+                                        <a href="{{ route('frontend.services.detail', $service->slug) }}">{{ $service->title }}</a>
                                         </h4>
                                         <div class="figcaption-number animate-top-content">
                                             {{-- Döngü index'ini kullanarak numara oluşturma ($loop->iteration 1'den başlar) --}}

@@ -9,9 +9,17 @@ use App\Models\Project;
 use App\Models\Slide;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View; // View::share için (opsiyonel ama kullanışlı)
+use Illuminate\Support\Str;
 
 class FrontendController extends Controller
 {
+    public function __construct()
+    {
+        // Footer için son yazıları tüm frontend view'larına gönderelim
+        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
+        View::share('latestPosts', $latestPosts);
+    }
+
     // Anasayfa metodu (varsa kalsın)
     public function index()
     {
@@ -19,14 +27,10 @@ class FrontendController extends Controller
         // Anasayfada gösterilecek aktif projeleri çek (örneğin son 3 tane, sıralamaya göre)
         $projects = Project::where('status', true)->orderBy('order', 'asc')->take(3)->get();
 
-        // Footer için son yazılar (varsa)
-        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
-
         // Verileri view'a gönder
         return view('frontend.pages.home', [ // View yolunu 'pages' altına aldık
             'slides' => $slides,
             'projects' => $projects,
-            'latestPosts' => $latestPosts,
         ]);
     }
 
@@ -39,9 +43,6 @@ class FrontendController extends Controller
         // "Neler Yapıyoruz?" bölümü için aktif hizmetleri çek (sıralı)
         $services = Service::where('status', true)->orderBy('order', 'asc')->get();
 
-        // Footer için son 3 blog yazısını çek (Blog modelini ve rotasını varsayarak)
-        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
-
         // View::share ile $latestPosts'u tüm view'larda kullanılabilir yapabiliriz
         // veya sadece bu view'a gönderebiliriz. Şimdilik sadece gönderelim.
         // View::share('latestPosts', $latestPosts); 
@@ -50,36 +51,51 @@ class FrontendController extends Controller
         return view('frontend.pages.about', [
             'about' => $aboutData, // View içinde $about değişkeniyle erişilecek
             'services' => $services, // View içinde $services değişkeniyle erişilecek
-            'latestPosts' => $latestPosts, // Footer partial'ı için
+        
         ]);
+    }
+
+    // YENİ METOT: Hizmetler Listeleme Sayfası
+    public function servicesIndex()
+    {
+        // Aktif hizmetleri sıralı olarak çek
+        $services = Service::where('status', true)->orderBy('order', 'asc')->get();
+
+        // latestPosts share ediliyor
+        return view('frontend.pages.services.index', compact('services')); // Yeni view yolu
+    }
+
+    // YENİ METOT: Hizmet Detay Sayfası
+    // Slugify edilmiş başlığı URL'de kullanacağız
+    public function serviceDetail($slug) 
+    {
+        // Slug'a göre aktif hizmeti bul, bulunamazsa 404 döndür
+        $service = Service::where('slug', $slug)->where('status', true)->firstOrFail(); 
+
+        // latestPosts share ediliyor
+        return view('frontend.pages.services.detail', compact('service')); // Yeni view yolu
     }
 
     // Blog listesi metodu (varsa kalsın)
     public function blogIndex()
     {
         $posts = Blog::where('status', true)->latest()->paginate(10); // Örnek
-        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
-        return view('frontend.pages.blog.index', compact('posts', 'latestPosts'));
+        return view('frontend.pages.blog.index', compact('posts'));
     }
 
     // Blog detay metodu (varsa kalsın)
     public function blogDetail($slug)
     {
         $post = Blog::where('slug', $slug)->where('status', true)->firstOrFail();
-        $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
-        return view('frontend.pages.blog.detail', compact('post', 'latestPosts'));
+        return view('frontend.pages.blog.detail', compact('post'));
     }
 
-    // Diğer frontend metodları... (hizmetler, projeler, iletişim vb.)
-    public function services()
-    {
-        // Varsayılan: Hizmetler view'ı pages altında
-        return view('frontend.pages.services');
-    }
+ 
     public function projects()
     {
         // Varsayılan: Projeler view'ı pages altında
         return view('frontend.pages.projects');
+        
     }
     public function contact()
     {

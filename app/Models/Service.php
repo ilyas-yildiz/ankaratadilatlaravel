@@ -14,6 +14,7 @@ class Service extends Model
     protected $fillable = [
         'order', // Sıralama eklendi
         'title',
+        'slug',
         'content', // Standart 'content' adı kullanıldı
         'image_url',
         'status',

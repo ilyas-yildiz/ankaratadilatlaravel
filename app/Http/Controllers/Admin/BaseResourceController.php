@@ -50,6 +50,11 @@ abstract class BaseResourceController extends Controller
     {
         $validatedData = $request->validate($this->getValidationRules($request));
 
+        if (isset($validatedData['title']) && $this->model->getConnection()->getSchemaBuilder()->hasColumn($this->model->getTable(), 'slug')) {
+        $validatedData['slug'] = Str::slug($validatedData['title']);
+        // Slug'ın benzersizliğini kontrol et ve gerekirse ekle (_1, _2 gibi) - İsteğe bağlı, daha gelişmiş
+    }
+
         if ($this->getImageFieldName() && $request->hasFile($this->getImageFieldName())) {
             $filename = $this->imageService->saveImage(
                 $request->file($this->getImageFieldName()),
@@ -80,29 +85,43 @@ abstract class BaseResourceController extends Controller
         return response()->json($item);
     }
 
-    public function update(Request $request, $id)
+ public function update(Request $request, $id)
     {
         $item = $this->model->findOrFail($id);
         $validatedData = $request->validate($this->getValidationRules($request, $id));
+        $hasSlugColumn = $this->model->getConnection()->getSchemaBuilder()->hasColumn($this->model->getTable(), 'slug');
+
+         // GÜNCELLENDİ: Slug oluşturma/güncelleme mantığı
+        if (isset($validatedData['title']) && $hasSlugColumn) {
+             // Eğer slug boşsa VEYA başlık değişmişse slug'ı yeniden oluştur/güncelle
+            if (empty($item->slug) || $item->title !== $validatedData['title']) { 
+                 $validatedData['slug'] = Str::slug($validatedData['title']);
+                 // İsteğe bağlı: Benzersizlik kontrolü eklenebilir
+                 // Örn: $validatedData['slug'] = $this->makeUniqueSlug($validatedData['slug'], $id);
+            }
+        }
 
         if ($this->getImageFieldName() && $request->hasFile($this->getImageFieldName())) {
-            // Mevcut resmi sil
             if ($item->image_url) {
-                $this->imageService->deleteImages($item->image_url, $this->getImagePath(), $this->getImageSizes());
+                // ImageService'i app() ile alalım (store'daki gibi)
+                app(ImageService::class)->deleteImages($item->image_url, $this->getImagePath(), $this->getImageSizes());
             }
-            // Yeni resmi kaydet
-            $filename = $this->imageService->saveImage(
+            $filename = app(ImageService::class)->saveImage(
                 $request->file($this->getImageFieldName()),
                 $this->getImagePath(),
                 $this->getImageSizes()
             );
             if ($filename) {
                 $validatedData['image_url'] = $filename;
+            } else {
+                 // Hata JSON'ı döndür
+                return response()->json(['success' => false, 'message' => $this->getResourceName() . ' görseli güncellenemedi.'], 422);
             }
         }
 
         $item->update($validatedData);
-        return response()->json(['success' => true, 'message' => 'Kayıt başarıyla güncellendi.']);
+         // Başarı JSON'ı aynı
+        return response()->json(['success' => true, 'message' => $this->getResourceName() . ' başarıyla güncellendi.']);
     }
 
     public function destroy($id)
@@ -121,4 +140,10 @@ abstract class BaseResourceController extends Controller
     // Alt sınıfların index veya formlar için ek veri göndermesini sağlayan boş metodlar
     protected function getAdditionalDataForIndex(): array { return []; }
     protected function getAdditionalDataForForms(): array { return []; }
+    // YENİ: getResourceName metodu (SlideController'dan buraya taşıdım, daha merkezi)
+protected function getResourceName(): string
+{
+    return Str::singular(Str::studly($this->getRouteName()));
+}
+
 }

@@ -29,7 +29,8 @@ Route::name('frontend.')->group(function () {
     Route::get('/hakkimizda', [FrontendController::class, 'about'])->name('about');
 
     // Diğer frontend rotaları (header'da kullandıklarımız)
-    Route::get('/hizmetlerimiz', [FrontendController::class, 'services'])->name('services');
+    Route::get('/hizmetlerimiz', [FrontendController::class, 'servicesIndex'])->name('services'); // Liste sayfası
+    Route::get('/hizmetlerimiz/{slug}', [FrontendController::class, 'serviceDetail'])->name('services.detail'); // Detay sayfası
     Route::get('/projelerimiz', [FrontendController::class, 'projects'])->name('projects');
     Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index');
     // Blog detay rotası (slug parametresiyle)

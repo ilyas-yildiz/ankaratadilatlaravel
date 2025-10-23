@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Project;
 use App\Models\Slide;
 use App\Models\Gallery;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View; // View::share için (opsiyonel ama kullanışlı)
 use Illuminate\Support\Str;
@@ -20,6 +21,11 @@ class FrontendController extends Controller
         // Footer için son yazıları tüm frontend view'larına gönderelim
         $latestPosts = Blog::where('status', true)->latest()->take(3)->get();
         View::share('latestPosts', $latestPosts);
+
+        // YENİ: Ayarları da tüm view'larla paylaşabiliriz (opsiyonel)
+        // Ayarları tek seferde çekip bir diziye atalım (key => value)
+        $settings = Setting::pluck('value', 'key')->all();
+        View::share('settings', $settings);
     }
 
     // Anasayfa metodu (varsa kalsın)
@@ -155,10 +161,50 @@ public function projectsIndex()
 
         return view('frontend.pages.projects.detail', compact('project', 'otherProjects')); 
     }
-    public function contact()
+  public function contact()
     {
-        // Varsayılan: İletişim view'ı pages altında
-        return view('frontend.pages.contact');
+        // Ayarlar zaten View::share ile paylaşıldığı için burada tekrar çekmeye gerek yok.
+        // Eğer paylaşmasaydık burada çekecektik:
+        // $settings = Setting::pluck('value', 'key')->all();
+
+        // Sadece view'ı döndür
+        return view('frontend.pages.contact'); 
+        // Eğer ayarları sadece bu view'a göndermek isteseydik:
+        // return view('frontend.pages.contact', compact('settings'));
+    }
+
+    // YENİ: İletişim Formunu İşleme Metodu
+    public function handleContactForm(Request $request)
+    {
+        // Formdan gelen veriyi doğrula
+        $validated = $request->validate([
+            'username' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'message' => 'required|string|max:5000',
+        ]);
+
+        // E-posta gönderme mantığı buraya gelecek
+        // Örnek: Laravel Mail kullanarak
+        try {
+             // Ayarlardan admin e-postasını al
+            $adminEmail = Setting::where('key', 'email')->value('value'); // veya $this->settings['email'] eğer share edildiyse
+
+            \Illuminate\Support\Facades\Mail::raw("Gönderen: {$validated['username']} ({$validated['email']})\n\nMesaj:\n{$validated['message']}", function ($message) use ($validated, $adminEmail) {
+                $message->to($adminEmail)
+                        ->subject('Web Sitesi İletişim Formu Mesajı');
+                $message->from($validated['email'], $validated['username']); // Gönderen olarak kullanıcının e-postasını ayarla
+            });
+
+            // Başarılı olursa geri yönlendir ve başarı mesajı göster
+            return redirect()->route('frontend.contact')
+                             ->with('success', 'Mesajınız başarıyla gönderildi. Teşekkür ederiz!');
+
+        } catch (\Exception $e) {
+            // Hata olursa geri yönlendir ve hata mesajı göster
+             \Illuminate\Support\Facades\Log::error('İletişim formu e-posta gönderme hatası: ' . $e->getMessage()); // Hatayı logla
+            return redirect()->route('frontend.contact')
+                             ->with('error', 'Mesajınız gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+        }
     }
 
 

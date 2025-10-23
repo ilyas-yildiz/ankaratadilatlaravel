@@ -35,7 +35,8 @@ Route::name('frontend.')->group(function () {
     Route::get('/projelerimiz/{slug}', [FrontendController::class, 'projectDetail'])->name('projects.detail'); // Detay sayfası
     Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index'); // Liste
     Route::get('/blog/{slug}', [FrontendController::class, 'blogDetail'])->name('blog.detail');
-    Route::get('/iletisim', [FrontendController::class, 'contact'])->name('contact');
+    Route::get('/iletisim', [FrontendController::class, 'contact'])->name('contact'); // Sayfayı göster
+    Route::post('/iletisim', [FrontendController::class, 'handleContactForm'])->name('contact.submit'); // Formu işle
 });
 
 /*

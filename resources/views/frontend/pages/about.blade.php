@@ -23,7 +23,7 @@
                         {{-- Başlık ve kısa içerik veritabanından ($about değişkeni) --}}
                         <h2 class="m-tb0">{{ $about->title ?? 'Hakkımızda' }}</h2>
                         {{-- Kısa içerik yoksa varsayılan metin gösterilebilir --}}
-                        <span>{{ $about->short_content ?? 'Yüksek kalite standartları ve müşteri odaklı yaklaşımımızla...' }}</span>
+                        <span class="text-white">{{ $about->short_content ?? 'Yüksek kalite standartları ve müşteri odaklı yaklaşımımızla...' }}</span>
                     </div>
                 </div>
                 <div>

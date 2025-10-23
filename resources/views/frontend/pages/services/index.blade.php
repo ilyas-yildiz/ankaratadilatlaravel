@@ -13,7 +13,7 @@
                     <div class="banner-title-name">
                         <h2 class="m-tb0">Hizmetlerimiz</h2>
                         {{-- Bu metin statik kalabilir veya Ayarlar'dan çekilebilir --}}
-                        <span>Yüksek kalite standartları ve müşteri odaklı yaklaşımımızla her projede fark yaratıyoruz...</span>
+                        <span class="text-white">Yüksek kalite standartları ve müşteri odaklı yaklaşımımızla her projede fark yaratıyoruz...</span>
                     </div>
                 </div>
                 <div>

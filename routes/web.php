@@ -39,6 +39,12 @@ Route::name('frontend.')->group(function () {
     Route::post('/iletisim', [FrontendController::class, 'handleContactForm'])->name('contact.submit'); // Formu işle
 });
 
+// -----------------------------------------------------------
+// YENİ EKLEME: SITEMAP XML ROTASI (ON-DEMAND)
+// -----------------------------------------------------------
+Route::get('/sitemap.xml', [FrontendController::class, 'generateSitemap'])->name('sitemap');
+
+
 /*
 |--------------------------------------------------------------------------
 | Auth Routes

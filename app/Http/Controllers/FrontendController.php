@@ -11,8 +11,13 @@ use App\Models\Slide;
 use App\Models\Gallery;
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View; // View::share için (opsiyonel ama kullanışlı)
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Response; // YENİ EKLEME: Response sınıfı için
+
+// Sitemap için yeni eklenenler
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
 
 class FrontendController extends Controller
 {
@@ -51,11 +56,6 @@ class FrontendController extends Controller
         // "Neler Yapıyoruz?" bölümü için aktif hizmetleri çek (sıralı)
         $services = Service::where('status', true)->orderBy('order', 'asc')->get();
 
-        // View::share ile $latestPosts'u tüm view'larda kullanılabilir yapabiliriz
-        // veya sadece bu view'a gönderebiliriz. Şimdilik sadece gönderelim.
-        // View::share('latestPosts', $latestPosts); 
-
-        // Verileri view'a gönder
         return view('frontend.pages.about', [
             'about' => $aboutData, // View içinde $about değişkeniyle erişilecek
             'services' => $services, // View içinde $services değişkeniyle erişilecek
@@ -85,7 +85,7 @@ class FrontendController extends Controller
     }
 
     // Blog listesi metodu (varsa kalsın)
-public function blogIndex()
+    public function blogIndex()
     {
         // Aktif blog yazılarını en yeniden eskiye doğru sayfalı olarak çek
         // Örneğin, sayfa başına 10 yazı gösterelim
@@ -93,9 +93,6 @@ public function blogIndex()
 
         // Sidebar için son yazılar (footer'dakiyle aynı olabilir)
         $latestPostsSidebar = Blog::where('status', true)->latest()->take(5)->get(); // Sidebar için 5 tane alalım
-
-        // Sidebar için kategoriler (Blog modelinde category ilişkisi varsa)
-        // $categories = Category::where('status', true)->where('type', 'blog')->orderBy('order', 'asc')->get();
 
         return view('frontend.pages.blogs.index', compact('posts', 'latestPostsSidebar'/*, 'categories'*/));
     }
@@ -131,14 +128,10 @@ public function blogIndex()
         return view('frontend.pages.blogs.detail', compact('post', 'previousPost', 'nextPost', 'suggestedPosts'));
     }
 
- 
-public function projectsIndex() 
+    public function projectsIndex() 
     {
         // Tüm aktif projeleri sıralı olarak çek
         $projects = Project::where('status', true)->orderBy('order', 'asc')->get(); 
-
-        // Proje tiplerini alıp filtreleme için view'a gönderebiliriz (opsiyonel)
-        // $projectTypes = Project::where('status', true)->distinct()->pluck('project_type')->filter()->sort();
 
         return view('frontend.pages.projects.index', compact('projects'/*, 'projectTypes'*/)); 
     }
@@ -161,16 +154,9 @@ public function projectsIndex()
 
         return view('frontend.pages.projects.detail', compact('project', 'otherProjects')); 
     }
-  public function contact()
+    public function contact()
     {
-        // Ayarlar zaten View::share ile paylaşıldığı için burada tekrar çekmeye gerek yok.
-        // Eğer paylaşmasaydık burada çekecektik:
-        // $settings = Setting::pluck('value', 'key')->all();
-
-        // Sadece view'ı döndür
         return view('frontend.pages.contact'); 
-        // Eğer ayarları sadece bu view'a göndermek isteseydik:
-        // return view('frontend.pages.contact', compact('settings'));
     }
 
     // YENİ: İletişim Formunu İşleme Metodu
@@ -184,15 +170,13 @@ public function projectsIndex()
         ]);
 
         // E-posta gönderme mantığı buraya gelecek
-        // Örnek: Laravel Mail kullanarak
         try {
-             // Ayarlardan admin e-postasını al
-            $adminEmail = Setting::where('key', 'email')->value('value'); // veya $this->settings['email'] eğer share edildiyse
+            $adminEmail = Setting::where('key', 'email')->value('value'); 
 
             \Illuminate\Support\Facades\Mail::raw("Gönderen: {$validated['username']} ({$validated['email']})\n\nMesaj:\n{$validated['message']}", function ($message) use ($validated, $adminEmail) {
                 $message->to($adminEmail)
                         ->subject('Web Sitesi İletişim Formu Mesajı');
-                $message->from($validated['email'], $validated['username']); // Gönderen olarak kullanıcının e-postasını ayarla
+                $message->from($validated['email'], $validated['username']);
             });
 
             // Başarılı olursa geri yönlendir ve başarı mesajı göster
@@ -200,12 +184,83 @@ public function projectsIndex()
                              ->with('success', 'Mesajınız başarıyla gönderildi. Teşekkür ederiz!');
 
         } catch (\Exception $e) {
-            // Hata olursa geri yönlendir ve hata mesajı göster
-             \Illuminate\Support\Facades\Log::error('İletişim formu e-posta gönderme hatası: ' . $e->getMessage()); // Hatayı logla
+             \Illuminate\Support\Facades\Log::error('İletişim formu e-posta gönderme hatası: ' . $e->getMessage()); 
             return redirect()->route('frontend.contact')
                              ->with('error', 'Mesajınız gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
         }
     }
+    
+    // -----------------------------------------------------------
+    // YENİ EKLEME: GERÇEK ZAMANLI SITEMAP METODU
+    // -----------------------------------------------------------
+    /**
+     * Sitenin sitemap.xml dosyasını anlık olarak (on-demand) oluşturur ve XML formatında döndürür.
+     * Bu yöntem, Cron Job ihtiyacını ortadan kaldırır.
+     *
+     * @return \Illuminate\Http\Response
+     */
+   public function generateSitemap()
+    {
+        // Statik ve dinamik rotaları barındıracak Sitemap nesnesi oluşturuluyor.
+        $sitemap = Sitemap::create();
+        
+        // --- 1. STATİK ROTALAR ---
+        
+        // Ana Sayfa (En yüksek öncelik)
+        $sitemap->add(
+            Url::create('/')
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
+                ->setPriority(1.0)
+        );
 
+        // Hakkımızda ve İletişim
+        $sitemap->add(Url::create('/hakkimizda')->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)->setPriority(0.8));
+        $sitemap->add(Url::create('/iletisim')->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)->setPriority(0.7));
+        
+        // Liste Sayfaları
+        $sitemap->add(Url::create('/hizmetlerimiz')->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)->setPriority(0.8));
+        $sitemap->add(Url::create('/projelerimiz')->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)->setPriority(0.8));
+        $sitemap->add(Url::create('/blog')->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)->setPriority(0.9));
+        
+        // --- 2. DİNAMİK ROTALAR (Veritabanı) ---
 
+        // Blog Yazıları (Blog) - En önemli içerikler
+        Blog::where('status', true)->get()->each(function (Blog $blog) use ($sitemap) {
+            $sitemap->add(
+                Url::create("/blog/{$blog->slug}")
+                    ->setLastModificationDate($blog->updated_at)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                    ->setPriority(0.9)
+            );
+        });
+
+        // Hizmet Detayları (Service)
+        Service::where('status', true)->get()->each(function (Service $service) use ($sitemap) {
+            $sitemap->add(
+                Url::create("/hizmetlerimiz/{$service->slug}")
+                    ->setLastModificationDate($service->updated_at)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                    ->setPriority(0.7)
+            );
+        });
+
+        // Proje Detayları (Project)
+        Project::where('status', true)->get()->each(function (Project $project) use ($sitemap) {
+            $sitemap->add(
+                Url::create("/projelerimiz/{$project->slug}")
+                    ->setLastModificationDate($project->updated_at)
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                    ->setPriority(0.7)
+            );
+        });
+        
+        // ÖNEMLİ DÜZELTME: Sitemap içeriğini Response::make ile manuel olarak döndürürken
+        // Content-Type başlığını XML olarak ayarla.
+        return Response::make(
+            $sitemap->render(), 
+            200, 
+            ['Content-Type' => 'application/xml']
+        );
+    }
 }
+

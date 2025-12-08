@@ -54,6 +54,27 @@
                         </ul>
                     </div>
 
+{{-- İÇİNDEKİLER TABLOSU (Sadece başlık varsa göster) --}}
+                    @if(!empty($tocList) && count($tocList) > 1) {{-- En az 2 başlık varsa göster --}}
+                    <div class="toc-container bg-gray p-a20 m-b30" style="border-left: 4px solid #ffc107; border-radius: 4px;">
+                        <p class="font-weight-bold m-b10" style="font-size: 18px;">
+                            <i class="fa fa-list-ol m-r10"></i> İçindekiler
+                        </p>
+                        <nav>
+                            <ul class="list-unstyled m-b0">
+                                @foreach($tocList as $item)
+                                    {{-- Başlık seviyesine göre girinti veriyoruz (Hierarchy) --}}
+                                    <li style="margin-left: {{ ($item['level'] - 2) * 20 }}px; margin-bottom: 5px;">
+                                        <a href="{{ $item['slug'] }}" class="text-black toc-link" style="text-decoration: none; font-size: 15px;">
+                                            <i class="fa fa-angle-right text-primary m-r5"></i> {{ $item['text'] }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </nav>
+                    </div>
+                    @endif
+
                     {{-- Blog İçeriği (Summernote'tan geldiği için HTML olarak basılır) --}}
                     <div class="sx-post-text">
                         {!! $post->content !!}
@@ -137,6 +158,65 @@
 {{-- Gerekli JS (varsa) --}}
 @push('custom-scripts')
 <script>
-    // Detay sayfası için özel JS kodları buraya eklenebilir.
+  // --- TOC (İçindekiler) Scroll ve Highlight Düzeltmesi ---
+    jQuery('.toc-link').on('click', function(e) {
+        e.preventDefault();
+
+        var targetId = this.getAttribute('href'); 
+        var target = jQuery(targetId);
+
+        if (target.length) {
+            // Önceki yanıp sönme sınıflarını temizle (Arka arkaya hızlı basılırsa karışmasın)
+            jQuery('.content-body h2, .content-body h3, .content-body h4').removeClass('target-flash');
+
+            var headerOffset = 150; // Header boşluğu
+            var targetPosition = target.offset().top - headerOffset;
+
+            // Kaydırma işlemi
+            jQuery('html, body').animate({
+                scrollTop: targetPosition
+            }, 800, function() {
+                // --- BURASI YENİ ---
+                // Kaydırma bittiği anda çalışır:
+                
+                // 1. Sınıfı ekle (Animasyon başlar)
+                target.addClass('target-flash');
+
+                // 2. Animasyon süresi (2s) bitince sınıfı temizle ki tekrar tetiklenebilsin
+                setTimeout(function() {
+                    target.removeClass('target-flash');
+                }, 2000); 
+            });
+        }
+    });
 </script>
+<style>
+    /* Tüm sayfa için yumuşak kaydırma */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* İçindekiler linkine hover efekti */
+    .toc-link:hover {
+        color: #ffc107 !important; /* Senin tema rengin sarı/gold sanırım */
+        text-decoration: underline !important;
+    }
+
+    /* Fixed Header sorunu için: Header'ın yüksekliği kadar yukarıda durmasını sağlar */
+    /* Header yüksekliğin yaklaşık 100px ise burayı ona göre ayarla */
+    .content-body h2, .content-body h3, .content-body h4, .content-body h5 {
+        scroll-margin-top: 120px; 
+    }
+    
+    /* Yanıp sönme animasyonu */
+    @keyframes flashHighlight {
+        0% { background-color: rgba(255, 193, 7, 0.4); border-radius: 5px; } /* Sarı ve şeffaf */
+        100% { background-color: transparent; border-radius: 5px; }
+    }
+
+    /* JavaScript ile eklenecek sınıf */
+    .target-flash {
+        animation: flashHighlight 2s ease-out; /* 2 saniye sürer ve biter */
+    }
+</style>
 @endpush

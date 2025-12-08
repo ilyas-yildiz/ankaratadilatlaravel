@@ -58,7 +58,24 @@
         </div>
     </div>
 </div>
-
+<div class="mb-3">
+    <label for="{{ $editorId }}_published_at" class="form-label">Yayınlanma Tarihi (Zamanlama)</label>
+    <div class="input-group">
+        <input type="datetime-local" 
+               class="form-control" 
+               id="{{ $editorId }}_published_at" 
+               name="published_at" 
+               value="{{ old('published_at', isset($item) && $item->published_at ? $item->published_at->format('Y-m-d\TH:i') : '') }}">
+        <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('{{ $editorId }}_published_at').value = ''">Temizle (Taslak)</button>
+    </div>
+    <div class="form-text">
+        <span class="text-muted">
+            <i class="ri-information-line"></i> 
+            Eğer boş bırakırsanız <strong>Taslak</strong> olarak kaydedilir. 
+            İleri bir tarih seçerseniz o tarihte yayınlanır.
+        </span>
+    </div>
+</div>
 <div class="mb-3">
     <label for="is_featured" class="form-label">Manşet Ayarı</label>
     <div class="form-check form-switch form-switch-lg">

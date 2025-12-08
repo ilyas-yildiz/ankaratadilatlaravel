@@ -257,6 +257,16 @@ document.addEventListener('DOMContentLoaded', function () {
                             } else {
                                 field.value = null;
                             }
+                            // --- BU KISMI EKLE ---
+                        } else if (field.type === 'datetime-local') {
+                            // Datetime inputu YYYY-MM-DDTHH:mm formatını ister
+                            // Gelen format: "2025-12-08T19:50:00.000000Z" -> Substring ile "2025-12-08T19:50" alıyoruz.
+                            if (item[key] && typeof item[key] === 'string') {
+                                field.value = item[key].substring(0, 16);
+                            } else {
+                                field.value = '';
+                            }
+                            // ---------------------
                         } else if (field.type === 'checkbox') {
                             field.checked = item[key] == 1; // Değer 1 ise işaretle
                         } else if (field.tagName === 'SELECT') {
@@ -266,6 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                 });
+
 
                 // Ana görsel önizlemesini ayarla (eğer URL varsa)
                 if (item.image_full_url && imagePreviewContainer && imagePreview) {

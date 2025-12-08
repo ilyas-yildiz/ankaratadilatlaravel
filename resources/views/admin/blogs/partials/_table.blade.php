@@ -8,19 +8,41 @@
             <th scope="col">Başlık</th>
             <th scope="col">Kategori</th>
             <th scope="col">Yazar</th>
+            <th scope="col">Yayın Tarihi</th> {{-- YENİ SÜTUN --}}
             <th scope="col">Durumu</th>
             <th scope="col">İşlemler</th>
         </tr>
         </thead>
-        {{-- ID'yi jenerik hale getiriyoruz ve data attribute'ları ekliyoruz --}}
-        <tbody id="sortable-list" data-update-url="{{ route('admin.common.updateOrder', ['model' => $routeName]) }}" data-model="{{ $routeName }}">        @forelse ($data as $item)
+        <tbody id="sortable-list" data-update-url="{{ route('admin.common.updateOrder', ['model' => $routeName]) }}" data-model="{{ $routeName }}">
+        @forelse ($data as $item)
             <tr data-id="{{ $item->id }}">
                 <td><div class="form-check"><input class="form-check-input row-checkbox" type="checkbox" value="{{ $item->id }}"></div></td>
                 <td class="handle-cell text-center"><i class="ri-menu-2-line handle"></i></td>
                 <td>{{ $item->id }}</td>
-                <td>{{ $item->title }}</td>
+                <td>
+                    <span class="fw-medium">{{ $item->title }}</span>
+                </td>
                 <td>{{ $item->category?->name ?? 'Belirtilmemiş' }}</td>
                 <td>{{ $item->user?->name ?? 'Belirtilmemiş' }}</td>
+                
+                {{-- YENİ SÜTUN İÇERİĞİ --}}
+                <td>
+                    @if(!$item->published_at)
+                        <span class="badge bg-secondary">Taslak</span>
+                    @else
+                        <div class="d-flex flex-column">
+                            @if($item->published_at > now())
+                                <span class="badge bg-warning text-dark mb-1" style="width: fit-content;">Zamanlandı</span>
+                            @else
+                                <span class="badge bg-success mb-1" style="width: fit-content;">Yayında</span>
+                            @endif
+                            <small class="text-muted" style="font-size: 11px;">
+                                <i class="ri-calendar-line"></i> {{ $item->published_at->format('d.m.Y H:i') }}
+                            </small>
+                        </div>
+                    @endif
+                </td>
+
                 <td>
                     <div class="form-check form-switch form-switch-lg text-center">
                         <input type="checkbox" class="form-check-input status-switch"
@@ -34,7 +56,7 @@
                            data-bs-toggle="modal"
                            data-bs-target="#editModal"
                            data-id="{{ $item->id }}"
-                           data-fetch-url="{{ route('admin.' . $routeName . '.edit', $item->id) }}" {{-- BU SATIRI EKLEYİN --}}
+                           data-fetch-url="{{ route('admin.' . $routeName . '.edit', $item->id) }}"
                            data-update-url="{{ route('admin.' . $routeName . '.update', $item->id) }}">
                             <i class="ri-settings-4-line"></i>
                         </a>
@@ -46,7 +68,7 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="8" class="text-center">Henüz hiç kayıt eklenmemiş.</td></tr>
+            <tr><td colspan="9" class="text-center">Henüz hiç kayıt eklenmemiş.</td></tr>
         @endforelse
         </tbody>
     </table>

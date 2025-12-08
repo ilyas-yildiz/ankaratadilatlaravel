@@ -20,7 +20,7 @@ class BlogController extends BaseResourceController
     protected function getModelInstance(): Model { return new Blog(); }
     protected function getViewPath(): string { return 'blogs'; }
     protected function getRouteName(): string { return 'blogs'; }
-    protected function getValidationRules(Request $request, $id = null): array {
+ protected function getValidationRules(Request $request, $id = null): array {
         $rules = [
             'title' => 'required|string|max:255|unique:blogs,title,' . $id,
             'category_id' => 'required|exists:categories,id',
@@ -30,7 +30,8 @@ class BlogController extends BaseResourceController
             'is_featured' => 'required|boolean',
             'slug' => 'nullable|string',
             'meta_description' => 'nullable|string|max:255',
-            'meta_keywords' => 'nullable|string|max:255'
+            'meta_keywords' => 'nullable|string|max:255',
+            'published_at' => 'nullable|date', // <--- YENİ EKLENDİ
         ];
         $rules['image'] = $id ? 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240';
         return $rules;
@@ -54,13 +55,25 @@ class BlogController extends BaseResourceController
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id)
+public function edit($id)
     {
-        // Model'i $id kullanarak manuel olarak buluyoruz.
         $blog = Blog::findOrFail($id);
         
-        // Veriyi JSON olarak döndürüyoruz.
-        return response()->json(['item' => $blog]);
+        // 1. Modeli önce saf bir diziye çeviriyoruz.
+        $blogData = $blog->toArray();
+
+        // 2. published_at verisini, Carbon'un gücünü kullanarak 
+        // uygulamanın zaman dilimine (Europe/Istanbul) zorluyoruz.
+        if ($blog->published_at) {
+            // timezone() metodu saati İstanbul'a çeker (+3 saat ekler)
+            // format() metodu ise bunu string'e çevirir, böylece JSON tekrar UTC yapamaz.
+            $blogData['published_at'] = $blog->published_at
+                                             ->timezone(config('app.timezone'))
+                                             ->format('Y-m-d\TH:i');
+        }
+
+        // 3. Artık manipüle edilmiş diziyi gönderiyoruz.
+        return response()->json(['item' => $blogData]);
     }
 
 

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute; // Attribute sınıfını dahil et
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder; // Scope için eklendi
 
 class Blog extends Model
 {
@@ -19,6 +20,7 @@ class Blog extends Model
         'content',
         'image_url',
         'status',
+        'published_at', // <--- YENİ EKLENDİ
         'category_id',
         'user_id',
         'order',
@@ -29,8 +31,14 @@ class Blog extends Model
         'meta_keywords'
     ];
     
-    // YENİ EKLENDİ: Model JSON'a çevrildiğinde bu 'sanal' alanı da ekle.
     protected $appends = ['image_full_url'];
+
+    // YENİ EKLENDİ: Tarih formatını Carbon objesi olarak algılaması için
+    protected $casts = [
+        'published_at' => 'datetime',
+        'status' => 'boolean',
+        'is_featured' => 'boolean',
+    ];
 
     protected static function booted(): void
     {
@@ -43,12 +51,6 @@ class Blog extends Model
         });
     }
 
-    // YENİ EKLENDİ: 'image_full_url' adında sanal bir attribute oluşturuyoruz.
-    /**
-     * image_url'den tam erişilebilir bir URL oluşturur.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
     protected function imageFullUrl(): Attribute
     {
         return Attribute::make(
@@ -56,23 +58,18 @@ class Blog extends Model
         );
     }
     
-    public function user()
+    // YENİ SCOPE: Frontend'de sadece "Blog::published()->get()" diyerek
+    // hem tarihi gelmiş hem de statusu aktif olanları çekeceğiz.
+    public function scopePublished(Builder $query): void
     {
-        return $this->belongsTo(User::class);
+        $query->where('status', true)
+              ->whereNotNull('published_at')
+              ->where('published_at', '<=', now());
     }
 
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function gallery()
-    {
-        return $this->belongsTo(Gallery::class);
-    }
-
-    public function author(): BelongsTo
-    {
-        return $this->belongsTo(Author::class);
-    }
+    // İlişkiler aynen kalıyor...
+    public function user() { return $this->belongsTo(User::class); }
+    public function category() { return $this->belongsTo(Category::class); }
+    public function gallery() { return $this->belongsTo(Gallery::class); }
+    public function author(): BelongsTo { return $this->belongsTo(Author::class); }
 }

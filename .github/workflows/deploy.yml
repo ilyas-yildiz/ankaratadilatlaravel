@@ -64,7 +64,7 @@ jobs:
         # ZAMAN AŞIMI: 30 saniye yerine 30 dakika (1.800.000 ms)
         timeout: 1800000 
         
-        # Sadece değişenleri yükle (Sunucuyu silip baştan yazma)
+        # Sadece değişenleri yükle (Sunucuyu silip baştan yazmaa)
         dangerous-clean-slate: false
         
         # Gereksiz dosyaları gönderme!

@@ -1,0 +1,88 @@
+﻿name: Deploy Laravel Project to FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    
+    # 1. Adım: Kodu checkout et
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # KRİTİK: Sadece değişen dosyaları algılaması için bu şart!
+
+    # 2. Adım: PHP Ortamını Kur
+    - name: 🐘 Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, json, tokenizer, dom, pdo, pdo_mysql
+        tools: composer
+
+    # 2.5 Adım: Laravel Dizinleri
+    - name: Create necessary Laravel directories
+      run: |
+        mkdir -p bootstrap/cache
+        mkdir -p storage/framework/{sessions,views,cache}
+        mkdir -p storage/logs
+
+    # 3. Adım: Composer Kurulumu
+    - name: Install Dependencies
+      run: composer install --no-interaction --no-dev --optimize-autoloader --prefer-dist
+
+    # 4. Adım: Node.js Kurulumu
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    # 5. Adım: Asset Derleme
+    - name: 🔨 Build Assets
+      run: |
+        npm install
+        npm run build
+        # Gereksiz yükü azaltmak için node_modules siliniyor
+        rm -rf node_modules 
+
+    # 6. Adım: FTP ile Yükleme (Standart Yöntem)
+    - name: 🚀 Deploy to FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: ${{ secrets.SERVER_PATH }}
+        protocol: ftp
+        port: 21
+        
+        # ZAMAN AŞIMI: 30 saniye yerine 30 dakika (1.800.000 ms)
+        timeout: 1800000 
+        
+        # Sadece değişenleri yükle (Sunucuyu silip baştan yazma)
+        dangerous-clean-slate: false
+        
+        # Gereksiz dosyaları gönderme!
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/tests/**
+          **/phpunit.xml
+          **/README.md
+          .env
+          .env.example
+          .github/**
+          .editorconfig
+          storage/framework/sessions/*
+          storage/framework/views/*
+          storage/framework/cache/data/*
+          storage/logs/*
+          public/storage
+          docker-compose.yml
+          .dockerignore

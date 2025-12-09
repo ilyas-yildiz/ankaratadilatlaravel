@@ -1,0 +1,49 @@
+﻿name: Path Debugger (FTP - Listele ve Yükle)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_path:
+        description: 'Hedef Klasör (Boş bırakırsan veya / yaparsan ana dizine atar)'
+        required: false
+        default: '/'
+
+jobs:
+  debug-deploy-ftp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create Dummy HTML File
+        run: |
+          echo "<html><body style='background-color:purple; color:white; padding:50px; font-family:sans-serif;'>" > path_test.html
+          echo "<h1>Erisim Basarili! (FTP Root Test)</h1>" >> path_test.html
+          echo "<p>Bu dosya GitHub Actions tarafindan sunucu yolunu test etmek icin olusturuldu.</p>" >> path_test.html
+          echo "<p>Tarih: $(date)</p>" >> path_test.html
+          echo "</body></html>" >> path_test.html
+
+      - name: List Files & Upload via LFTP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+          
+          echo "---------------------------------------------------"
+          echo "SUNUCUYA BAGLANIYOR VE MEVCUT KLASORLER LISTELENIYOR..."
+          echo "---------------------------------------------------"
+          
+          # Önce sadece listeleme yapalım ki loglarda ne var ne yok görelim.
+          lftp -c "set ftp:ssl-allow no; set ssl:verify-certificate no; open -u $FTP_USER,$FTP_PASSWORD $FTP_SERVER; ls"
+          
+          echo "---------------------------------------------------"
+          echo "DOSYA YUKLEME ISLEMI BASLIYOR..."
+          echo "Hedef Klasor: $TARGET_DIR"
+          echo "---------------------------------------------------"
+          
+          # Şimdi dosyayı yüklemeyi deneyelim.
+          lftp -c "set ftp:ssl-allow no; set ssl:verify-certificate no; open -u $FTP_USER,$FTP_PASSWORD $FTP_SERVER; put -O '$TARGET_DIR' path_test.html"
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          TARGET_DIR: ${{ inputs.target_path }}

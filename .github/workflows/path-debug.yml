@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       target_path:
-        description: 'Hedef Klasör (Boş bırakırsan veya / yaparsan ana dizine atar)'
+        description: 'Hedef Klasör (Boş bırakırsan veya/yaparsan ana dizine atar)'
         required: false
         default: '/'
 

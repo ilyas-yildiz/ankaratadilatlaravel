@@ -17,13 +17,18 @@ class CategoryController extends Controller
         $this->imageService = $imageService;
     }
 
-    public function index()
+public function index()
     {
-        // Hiyerarşik görünüm için parent ve children'ı eager load yapabiliriz
-        // Ancak düz listede parent ismini göstermek yeterli olacaktır.
-        $categories = Category::with('parent')->orderBy('order')->get();
-        
-        // Modal içindeki select box için tüm kategorileri gönderelim
+        // Sadece ANA kategorileri (parent_id = null) çekiyoruz.
+        // Alt kategorileri ise 'with' ile eager loading yaparak içlerine dahil ediyoruz.
+        $categories = Category::whereNull('parent_id')
+            ->with(['children' => function($query) {
+                $query->orderBy('order', 'asc'); // Alt kategorileri kendi içinde sırala
+            }])
+            ->orderBy('order', 'asc') // Ana kategorileri sırala
+            ->get();
+
+        // Modal içindeki select box için tüm kategoriler (Burası aynı kalıyor)
         $parentCategories = Category::where('status', true)->orderBy('name')->get();
 
         return view('admin.categories.index', compact('categories', 'parentCategories'));

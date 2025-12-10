@@ -31,34 +31,31 @@
                         </thead>
                         <tbody id="categoriesTable">
                         @forelse ($categories as $category)
-                            <tr data-id="{{ $category->id }}">
+                            {{-- === ANA KATEGORİ SATIRI === --}}
+                            <tr data-id="{{ $category->id }}" class="table-light fw-bold" style="border-top: 2px solid #dee2e6;">
                                 <td class="handle-cell text-center" style="cursor: move;">
-                                    <i class="ri-drag-move-2-line fs-20 text-muted"></i>
+                                    <i class="ri-drag-move-2-line fs-20 text-dark"></i>
                                 </td>
                                 <td>
+                                    {{-- Ana kategori görseli biraz daha büyük olabilir --}}
                                     @if($category->image_url)
-                                        <img src="{{ asset('storage/category-images/100x100/' . $category->image_url) }}" alt="" class="avatar-xs rounded-circle">
+                                        <img src="{{ asset('storage/category-images/100x100/' . $category->image_url) }}" alt="" class="avatar-sm rounded-circle">
                                     @else
-                                        <div class="avatar-xs">
-                                            <span class="avatar-title rounded-circle bg-light text-primary">
+                                        <div class="avatar-sm">
+                                            <span class="avatar-title rounded-circle bg-primary text-white fs-18">
                                                 {{ strtoupper(substr($category->name, 0, 1)) }}
                                             </span>
                                         </div>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="fw-medium">{{ $category->name }}</span>
+                                    <span class="text-primary text-uppercase">{{ $category->name }}</span>
                                     @if($category->description)
-                                        <i class="ri-information-fill text-muted" title="{{ Str::limit($category->description, 50) }}"></i>
+                                        <i class="ri-information-fill text-muted ms-1" title="{{ Str::limit($category->description, 50) }}"></i>
                                     @endif
+                                    <span class="badge badge-soft-dark ms-2 text-black">(Ana Kategori)</span>
                                 </td>
-                                <td>
-                                    @if($category->parent)
-                                        <span class="badge bg-soft-info text-info">{{ $category->parent->name }}</span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
+                                <td>-</td> {{-- Ana kategorinin üstü yoktur --}}
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="badge" style="background-color: {{ $category->color }};">{{ $category->color }}</span>
@@ -72,7 +69,6 @@
                                 </td>
                                 <td>
                                     <div class="hstack gap-3 fs-15">
-                                        {{-- Edit butonu artık AJAX ile modal içeriğini dolduracak --}}
                                         <a href="javascript:void(0);" 
                                            class="link-primary openEditModal" 
                                            data-url="{{ route('admin.categories.edit', $category->id) }}"
@@ -88,6 +84,67 @@
                                     </div>
                                 </td>
                             </tr>
+
+                            {{-- === ALT KATEGORİLER DÖNGÜSÜ === --}}
+                            @foreach($category->children as $child)
+                                <tr data-id="{{ $child->id }}" class="child-row">
+                                    <td class="handle-cell text-center" style="cursor: move;">
+                                        <i class="ri-drag-move-2-line fs-16 text-muted"></i>
+                                    </td>
+                                    <td>
+                                        <div style="padding-left: 20px;"> {{-- Görselde de hafif girinti --}}
+                                            @if($child->image_url)
+                                                <img src="{{ asset('storage/category-images/100x100/' . $child->image_url) }}" alt="" class="avatar-xs rounded-circle">
+                                            @else
+                                                <div class="avatar-xs">
+                                                    <span class="avatar-title rounded-circle bg-light text-secondary">
+                                                        {{ strtoupper(substr($child->name, 0, 1)) }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">
+                                        {{-- GİRİNTİ İKONU VE BOŞLUK --}}
+                                        <div style="padding-left: 20px; border-left: 2px solid #e9ebec;">
+                                            <i class="ri-corner-down-right-line me-2"></i> 
+                                            {{ $child->name }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ $category->name }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge" style="background-color: {{ $child->color }};">{{ $child->color }}</span>
+                                            <small class="text-muted">{{ $child->slug }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch form-switch-lg text-center" dir="ltr">
+                                            <input type="checkbox" class="form-check-input category-status-switch" data-id="{{ $child->id }}" {{ $child->status ? 'checked' : '' }}>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="hstack gap-3 fs-15">
+                                            <a href="javascript:void(0);" 
+                                               class="link-primary openEditModal" 
+                                               data-url="{{ route('admin.categories.edit', $child->id) }}"
+                                               data-update-url="{{ route('admin.categories.update', $child->id) }}">
+                                                <i class="ri-settings-4-line"></i>
+                                            </a>
+                                            <form action="{{ route('admin.categories.destroy', $child) }}" method="POST" class="d-inline deleteCategoryForm">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="link-danger border-0 bg-transparent p-0">
+                                                    <i class="ri-delete-bin-5-line"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            {{-- Alt kategoriler sonu --}}
+
                         @empty
                             <tr><td colspan="7" class="text-center">Kayıt bulunamadı.</td></tr>
                         @endforelse

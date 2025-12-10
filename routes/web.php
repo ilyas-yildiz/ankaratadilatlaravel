@@ -114,32 +114,32 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/sistemi-temizle-12345', function () {
-    try {
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
-        Artisan::call('view:clear');
-        Artisan::call('route:clear');
-        return "Butun onbellekler temizlendi!";
-    } catch (Exception $e) {
-        return "Hata: " . $e->getMessage();
-    }
-});
+// Route::get('/sistemi-temizle-12345', function () {
+//     try {
+//         Artisan::call('cache:clear');
+//         Artisan::call('config:clear');
+//         Artisan::call('view:clear');
+//         Artisan::call('route:clear');
+//         return "Butun onbellekler temizlendi!";
+//     } catch (Exception $e) {
+//         return "Hata: " . $e->getMessage();
+//     }
+// });
 
-Route::get('/run-user-seeder-a1b2c3d4e5f6', function () {
-    try {
-        Artisan::call('db:seed', ['--class' => 'UserSeeder', '--force' => true]);
-        return 'UserSeeder başarıyla çalıştırıldı.';
-    } catch (\Exception $e) {
-        return 'Hata: ' . $e->getMessage();
-    }
-});
+// Route::get('/run-user-seeder-a1b2c3d4e5f6', function () {
+//     try {
+//         Artisan::call('db:seed', ['--class' => 'UserSeeder', '--force' => true]);
+//         return 'UserSeeder başarıyla çalıştırıldı.';
+//     } catch (\Exception $e) {
+//         return 'Hata: ' . $e->getMessage();
+//     }
+// });
 
-Route::get('/migrate-now', function () {
-    try {
-        Artisan::call('migrate', ['--force' => true]);
-        return 'Veritabanı başarıyla güncellendi!';
-    } catch (Exception $e) {
-        return 'Hata oluştu: ' . $e->getMessage();
-    }
-});
+// Route::get('/migrate-now', function () {
+//     try {
+//         Artisan::call('migrate', ['--force' => true]);
+//         return 'Veritabanı başarıyla güncellendi!';
+//     } catch (Exception $e) {
+//         return 'Hata oluştu: ' . $e->getMessage();
+//     }
+// });

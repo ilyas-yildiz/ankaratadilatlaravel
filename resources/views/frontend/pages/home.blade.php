@@ -18,170 +18,205 @@
     {{-- Şimdilik SLIDE 2'yi kaldırdım, istersen geri ekleyebilirsin veya dinamik hale getirebiliriz --}}
     <div id="rev_slider_346_1_wrapper" class="rev_slider_wrapper fullscreen-container" data-alias="beforeafterslider1" data-source="gallery" style="background:#252525;padding:0px;">
         <div id="rev_slider_346_1" class="rev_slider fullscreenbanner" style="display:none;" data-version="5.4.3.3">
-            <ul>
-               {{-- === DİNAMİK SLIDER DÖNGÜSÜ BAŞLANGICI === --}}
-                    @isset($slides)
-                        @forelse($slides as $index => $slide)
-                            {{-- Her slide için bir <li> elementi --}}
-                            <li data-index="rs-{{ $slide->id }}"
-                                data-transition="fade"
-                                data-slotamount="default" data-hideafterloop="0" data-hideslideonmobile="off" data-easein="default" data-easeout="default" data-masterspeed="default" data-thumb="" data-rotate="0" data-saveperformance="off"
-                                data-title="{{ $slide->title ?? 'Slide' }}" data-description=""
-                                {{-- data-beforeafter: Ana (renkli) görseli tanımlar --}}
-                                data-beforeafter='{"moveto":"50%|50%|50%|50%",
-                                                   "bgColor":"transparent",
-                                                   "bgType":"image",
-                                                   "bgImage":"{{ $slide->image_url ? asset('storage/slide-images/1920x1080/' . $slide->image_url) : asset('assets/images/main-slider/slider5/slide1.jpg') }}",
-                                                   "bgFit":"cover",
-                                                   "bgPos":"center center",
-                                                   "bgRepeat":"no-repeat",
-                                                   "direction":"horizontal",
-                                                   "easing":"Power2.easeInOut",
-                                                   "delay":"500",
-                                                   "time":"750",
-                                                   "out":"fade",
-                                                   "carousel":false}'>
+          <ul>
+                {{-- === DİNAMİK SLIDER DÖNGÜSÜ BAŞLANGICI === --}}
+                @isset($slides)
+                    @forelse($slides as $index => $slide)
+                        <li data-index="rs-{{ $slide->id }}"
+                            data-transition="fade"
+                            data-slotamount="default" 
+                            data-hideafterloop="0" 
+                            data-hideslideonmobile="off" 
+                            data-easein="default" 
+                            data-easeout="default" 
+                            data-masterspeed="default" 
+                            data-thumb="" 
+                            data-rotate="0" 
+                            data-saveperformance="off"
+                            data-title="{{ $slide->title ?? 'Slide' }}" 
+                            data-description=""
+                            data-beforeafter='{"moveto":"50%|50%|50%|50%", "bgColor":"transparent", "bgType":"image", "bgImage":"{{ $slide->image_url ? asset('storage/slide-images/1920x1080/' . $slide->image_url) : asset('assets/images/main-slider/slider5/slide1.jpg') }}", "bgFit":"cover", "bgPos":"center center", "bgRepeat":"no-repeat", "direction":"horizontal", "easing":"Power2.easeInOut", "delay":"500", "time":"750", "out":"fade", "carousel":false}'>
 
-                                {{-- Buraya SKETCH görselini yerleştiriyoruz --}}
-                                <img src="{{ $slide->image_sketch_url ? asset('storage/slide-images-sketch/1920x1080/' . $slide->image_sketch_url) : asset('assets/images/main-slider/slider5/slide1-sk.jpg') }}"
-                                     data-beforeafter="after" {{-- Bu görselin 'after' olduğunu belirtir --}}
-                                     data-bgcolor='transparent' alt="{{ $slide->title ?? '' }}"
-                                     data-bgposition="center center" data-bgfit="cover" data-bgrepeat="no-repeat" data-bgparallax="off" class="rev-slidebg" data-no-retina="">
+                            {{-- SKETCH GÖRSELİ --}}
+                            <img src="{{ $slide->image_sketch_url ? asset('storage/slide-images-sketch/1920x1080/' . $slide->image_sketch_url) : asset('assets/images/main-slider/slider5/slide1-sk.jpg') }}"
+                                 data-beforeafter="after"
+                                 data-bgcolor='transparent' 
+                                 alt="{{ $slide->title ?? '' }}"
+                                 data-bgposition="center center" 
+                                 data-bgfit="cover" 
+                                 data-bgrepeat="no-repeat" 
+                                 data-bgparallax="off" 
+                                 class="rev-slidebg" 
+                                 data-no-retina="">
 
-                                {{-- LAYER NR. 1 (Başlık - BEFORE) --}}
+                            {{-- =================================================== --}}
+                            {{-- LAYER 1 & 4: BAŞLIK (Responsive Ayarları Yapıldı) --}}
+                            {{-- =================================================== --}}
+                            
+                            {{-- Değişiklikler: 
+                                1. data-fontsize: Mobilde 30px'e düşürüldü.
+                                2. data-lineheight: Mobilde 40px yapıldı.
+                                3. data-whitespace: ['nowrap','nowrap','normal','normal'] yapıldı (Mobilde alt satıra geçsin diye).
+                                4. data-width: Mobilde %90 genişlik verildi.
+                            --}}
+
+                            {{-- =================================================== --}}
+                            {{-- LAYER 1 & 4: BAŞLIK (Title) --}}
+                            {{-- =================================================== --}}
+                            
+                            {{-- =================================================== --}}
+                            {{-- LAYER 1 & 4: BAŞLIK (Title) --}}
+                            {{-- =================================================== --}}
+                            
+                            <div class="tp-caption tp-resizeme rs-parallaxlevel-5"
+                                 id="slide-{{ $slide->id }}-layer-1-before"
+                                 data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
+                                 
+                                 {{-- GÜNCELLEME BURADA: --}}
+                                 {{-- voffset: Desktop(-80), Laptop(-80), Tablet(-80), Mobil(-90) --}}
+                                 {{-- Başlığı yukarı çekerek alt satıra inse bile yer açıyoruz --}}
+                                 data-y="['middle','middle','middle','middle']" data-voffset="['-80','-80','-80','-90']"
+                                 
+                                 data-fontsize="['80','70','50','30']" 
+                                 data-lineheight="['90','80','60','36']"
+                                 data-width="['1000','900','600','360']"
+                                 data-whitespace="['normal','normal','normal','normal']"
+                                 
+                                 data-type="text"
+                                 data-beforeafter="before"
+                                 data-responsive_offset="on"
+                                 data-frames='[{"delay":600,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"}]'
+                                 data-textalign="['center','center','center','center']"
+                                 style="z-index: 5; font-weight: 900; color: #2e313b; letter-spacing: 0px; font-family: 'Poppins', sans-serif; text-transform:uppercase;">
+                                 {{ $slide->title }}
+                            </div>
+
+                            <div class="tp-caption tp-resizeme rs-parallaxlevel-5 tp-blackshadow"
+                                 id="slide-{{ $slide->id }}-layer-4-after"
+                                 data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
+                                 
+                                 {{-- GÜNCELLEME: voffset -80 yapıldı --}}
+                                 data-y="['middle','middle','middle','middle']" data-voffset="['-80','-80','-80','-90']"
+                                 
+                                 data-fontsize="['80','70','50','30']" 
+                                 data-lineheight="['90','80','60','36']"
+                                 data-width="['1000','900','600','360']"
+                                 data-whitespace="['normal','normal','normal','normal']"
+                                 
+                                 data-type="text"
+                                 data-beforeafter="after"
+                                 data-responsive_offset="on"
+                                 data-frames='[{"delay":2000,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"}]' 
+                                 data-textalign="['center','center','center','center']"
+                                 style="z-index: 16; font-weight: 900; color: #ffffff; letter-spacing: 0px; font-family: 'Poppins', sans-serif; text-transform:uppercase;">
+                                 {{ $slide->title }}
+                            </div>
+
+                            {{-- =================================================== --}}
+                            {{-- LAYER 2 & 5: ALT BAŞLIK (Subtitle) --}}
+                            {{-- =================================================== --}}
+                            @if($slide->subtitle)
                                 <div class="tp-caption tp-resizeme rs-parallaxlevel-5"
-                                     id="slide-{{ $slide->id }}-layer-1-before" {{-- ID güncellendi --}}
+                                     id="slide-{{ $slide->id }}-layer-2-before"
                                      data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                     data-y="['middle','middle','middle','middle']" data-voffset="['-40','-40','-40','-20']"
-                                     data-fontsize="['80','70','60','40']" data-lineheight="['80','70','60','40']"
-                                     data-width="['auto']" data-height="auto" data-whitespace="nowrap" data-type="text"
-                                     data-beforeafter="before" {{-- Eklendi --}}
-                                     data-responsive_offset="on"
-                                     data-frames='[{"delay":600,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"}]'
-                                     data-textalign="['center','center','center','center']"
-                                     style="z-index: 5; white-space: nowrap; font-weight: 900; 
-                                            color: #2e313b; {{-- Before Rengi --}}
-                                            letter-spacing: 0px; font-family: 'Poppins', sans-serif; text-transform:uppercase;">
-                                     {{ $slide->title }}
-                                </div>
-
-                                {{-- LAYER NR. 4 (Başlık - AFTER) --}}
-                                <div class="tp-caption tp-resizeme rs-parallaxlevel-5 tp-blackshadow" {{-- tp-blackshadow eklendi (orijinaldeki gibi) --}}
-                                     id="slide-{{ $slide->id }}-layer-4-after" {{-- ID güncellendi --}}
-                                     data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                     data-y="['middle','middle','middle','middle']" data-voffset="['-40','-40','-40','-20']"
-                                     data-fontsize="['80','70','60','40']" data-lineheight="['80','70','60','40']"
-                                     data-width="['auto']" data-height="auto" data-whitespace="nowrap" data-type="text"
-                                     data-beforeafter="after" {{-- Eklendi --}}
-                                     data-responsive_offset="on"
-                                      {{-- After için farklı animasyon başlangıcı (orijinaldeki gibi) --}}
-                                     data-frames='[{"delay":2000,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"}]' 
-                                     data-textalign="['center','center','center','center']"
-                                     style="z-index: 16; white-space: nowrap; font-weight: 900; 
-                                            color: #ffffff; {{-- After Rengi --}}
-                                            letter-spacing: 0px; font-family: 'Poppins', sans-serif; text-transform:uppercase;">
-                                     {{ $slide->title }}
-                                </div>
-
-
-                                {{-- LAYER NR. 2 (Alt Başlık - BEFORE - Eğer varsa) --}}
-                                @if($slide->subtitle)
-                                <div class="tp-caption tp-resizeme rs-parallaxlevel-5"
-                                     id="slide-{{ $slide->id }}-layer-2-before" {{-- ID güncellendi --}}
-                                     data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                     data-y="['middle','middle','middle','middle']" data-voffset="['40','40','20','20']"
-                                     data-fontsize="['24','22','20','18']" data-lineheight="['30','28','26','24']"
-                                     data-width="['800','700','600','400']" data-height="auto" data-whitespace="normal" data-type="text"
-                                     data-beforeafter="before" {{-- Eklendi --}}
+                                     
+                                     {{-- GÜNCELLEME: voffset değerleri artırıldı (aşağı itildi) --}}
+                                     {{-- Desktop(60), Laptop(50), Tablet(40), Mobil(20) --}}
+                                     data-y="['middle','middle','middle','middle']" data-voffset="['60','50','40','20']"
+                                     
+                                     data-fontsize="['24','22','20','16']" 
+                                     data-lineheight="['30','28','26','24']"
+                                     data-width="['800','700','600','320']"
+                                     data-whitespace="normal" 
+                                     
+                                     data-type="text"
+                                     data-beforeafter="before"
                                      data-responsive_offset="on"
                                      data-frames='[{"delay":900,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"}]'
                                      data-textalign="['center','center','center','center']"
-                                     style="z-index: 6; white-space: normal; font-weight: 500; 
-                                            color: #2e313b; {{-- Before Rengi --}}
-                                            letter-spacing: 0px; font-family: 'Poppins', sans-serif;">
+                                     style="z-index: 6; font-weight: 500; color: #2e313b; letter-spacing: 0px; font-family: 'Poppins', sans-serif;">
                                      {{ $slide->subtitle }}
                                 </div>
-                                @endif
 
-                                {{-- LAYER NR. 5 (Alt Başlık - AFTER - Eğer varsa) --}}
-                                @if($slide->subtitle)
                                 <div class="tp-caption tp-resizeme rs-parallaxlevel-5"
-                                     id="slide-{{ $slide->id }}-layer-5-after" {{-- ID güncellendi --}}
+                                     id="slide-{{ $slide->id }}-layer-5-after"
                                      data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                     data-y="['middle','middle','middle','middle']" data-voffset="['40','40','20','20']"
-                                     data-fontsize="['24','22','20','18']" data-lineheight="['30','28','26','24']"
-                                     data-width="['800','700','600','400']" data-height="auto" data-whitespace="normal" data-type="text"
-                                     data-beforeafter="after" {{-- Eklendi --}}
+                                     
+                                     {{-- GÜNCELLEME: voffset 60,50,40,20 --}}
+                                     data-y="['middle','middle','middle','middle']" data-voffset="['60','50','40','20']"
+                                     
+                                     data-fontsize="['24','22','20','16']" 
+                                     data-lineheight="['30','28','26','22']"
+                                     data-width="['800','700','600','300']"
+                                     data-whitespace="normal"
+                                     
+                                     data-type="text"
+                                     data-beforeafter="after"
                                      data-responsive_offset="on"
-                                      {{-- After için farklı animasyon başlangıcı --}}
                                      data-frames='[{"delay":2100,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"}]'
                                      data-textalign="['center','center','center','center']"
-                                     style="z-index: 17; white-space: normal; font-weight: 500; 
-                                            color: #ffffff; {{-- After Rengi --}}
-                                            letter-spacing: 0px; font-family: 'Poppins', sans-serif;">
+                                     style="z-index: 17; font-weight: 500; color: #ffffff; letter-spacing: 0px; font-family: 'Poppins', sans-serif;">
                                      {{ $slide->subtitle }}
                                 </div>
-                                @endif
+                            @endif
 
-
-                                {{-- LAYER NR. 3 (Buton - BEFORE - Eğer link ve metin varsa) --}}
-                                @if($slide->link && $slide->button_text)
-                                <a class="tp-caption rev-btn site-button btn-half rs-parallaxlevel-4" {{-- rs-parallaxlevel-4 eklendi --}}
+                            {{-- =================================================== --}}
+                            {{-- LAYER 3 & 6: BUTON --}}
+                            {{-- =================================================== --}}
+                            @if($slide->link && $slide->button_text)
+                                <a class="tp-caption rev-btn site-button btn-half rs-parallaxlevel-4"
                                    href="{{ $slide->link }}" target="_blank" rel="noopener noreferrer"
-                                   id="slide-{{ $slide->id }}-layer-3-before" {{-- ID güncellendi --}}
+                                   id="slide-{{ $slide->id }}-layer-3-before"
                                    data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                   data-y="['middle','middle','middle','middle']" data-voffset="['120','120','90','80']"
-                                   data-width="auto" data-height="auto" data-whitespace="nowrap" data-type="button" data-actions=''
-                                   data-beforeafter="before" {{-- Eklendi --}}
+                                   
+                                   {{-- GÜNCELLEME: Butonu da aşağı ittik ki alt başlık üzerine gelmesin --}}
+                                   {{-- Desktop(150), Laptop(140), Tablet(130), Mobil(100) --}}
+                                   data-y="['middle','middle','middle','middle']" data-voffset="['150','140','130','100']"
+                                   
+                                   data-width="auto" data-height="auto" data-whitespace="nowrap" data-type="button" 
+                                   data-beforeafter="before"
                                    data-responsive_offset="on"
-                                   data-frames='[{"delay":1200,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"},{"frame":"hover","speed":"300","ease":"Power1.easeInOut","to":"o:1;rX:0;rY:0;rZ:0;z:0;","style":"c:rgba(0,0,0,1);bg:rgba(255,255,255,1);bc:rgba(255,255,255,1);bw:2px 2px 2px 2px;"}]' {{-- Hover stili güncellendi --}}
+                                   data-frames='[{"delay":1200,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"},{"frame":"hover","speed":"300","ease":"Power1.easeInOut","to":"o:1;rX:0;rY:0;rZ:0;z:0;","style":"c:rgba(0,0,0,1);bg:rgba(255,255,255,1);bc:rgba(255,255,255,1);bw:2px 2px 2px 2px;"}]'
                                    data-textAlign="['center','center','center','center']"
-                                   data-paddingtop="[0,0,0,0]" data-paddingright="[30,30,30,25]" data-paddingbottom="[0,0,0,0]" data-paddingleft="[30,30,30,25]"
-                                   style="z-index: 7; white-space: nowrap; font-size: 16px; line-height: 50px; font-weight: 600; 
-                                          color: #fff; {{-- Before Rengi --}}
-                                          font-family: 'Poppins', sans-serif; 
-                                          background-color:#2e313b; {{-- Before Arka Plan --}}
-                                          border-color:rgba(0,0,0,1); border-style:solid; border-width:2px; border-radius:3px; outline:none; box-shadow:none; box-sizing:border-box; cursor:pointer; text-transform:uppercase;">
+                                   data-fontsize="['16','16','15','14']"
+                                   data-paddingtop="[0,0,0,0]" data-paddingright="[30,30,20,15]" data-paddingbottom="[0,0,0,0]" data-paddingleft="[30,30,20,15]"
+                                   style="z-index: 7; white-space: nowrap; font-size: 16px; line-height: 50px; font-weight: 600; color: #fff; font-family: 'Poppins', sans-serif; background-color:#2e313b; border-color:rgba(0,0,0,1); border-style:solid; border-width:2px; border-radius:3px; outline:none; box-shadow:none; box-sizing:border-box; cursor:pointer; text-transform:uppercase;">
                                    <span>{{ $slide->button_text }}</span>
                                 </a>
-                                @endif
 
-                                {{-- LAYER NR. 6 (Buton - AFTER - Eğer link ve metin varsa) --}}
-                                @if($slide->link && $slide->button_text)
-                                <a class="tp-caption rev-btn site-button btn-half rs-parallaxlevel-4" {{-- rs-parallaxlevel-4 eklendi --}}
+                                <a class="tp-caption rev-btn site-button btn-half rs-parallaxlevel-4"
                                    href="{{ $slide->link }}" target="_blank" rel="noopener noreferrer"
-                                   id="slide-{{ $slide->id }}-layer-6-after" {{-- ID güncellendi --}}
+                                   id="slide-{{ $slide->id }}-layer-6-after"
                                    data-x="['center','center','center','center']" data-hoffset="['0','0','0','0']"
-                                   data-y="['middle','middle','middle','middle']" data-voffset="['120','120','90','80']"
-                                   data-width="auto" data-height="auto" data-whitespace="nowrap" data-type="button" data-actions=''
-                                   data-beforeafter="after" {{-- Eklendi --}}
+                                   
+                                   {{-- GÜNCELLEME: voffset 150,140,130,100 --}}
+                                   data-y="['middle','middle','middle','middle']" data-voffset="['150','140','130','100']"
+                                   
+                                   data-width="auto" data-height="auto" data-whitespace="nowrap" data-type="button" 
+                                   data-beforeafter="after"
                                    data-responsive_offset="on"
-                                    {{-- After için farklı animasyon başlangıcı --}}
-                                   data-frames='[{"delay":2200,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"},{"frame":"hover","speed":"300","ease":"Power1.easeInOut","to":"o:1;rX:0;rY:0;rZ:0;z:0;","style":"c:rgba(255,255,255,1);bg:rgba(0,0,0,0.8);bc:rgba(0,0,0,1);bw:2px 2px 2px 2px;"}]' {{-- Hover stili güncellendi --}}
+                                   data-frames='[{"delay":2200,"speed":1500,"frame":"0","from":"y:50px;opacity:0;","to":"o:1;","ease":"Power3.easeInOut"},{"delay":"wait","speed":300,"frame":"999","to":"opacity:0;","ease":"Power3.easeInOut"},{"frame":"hover","speed":"300","ease":"Power1.easeInOut","to":"o:1;rX:0;rY:0;rZ:0;z:0;","style":"c:rgba(255,255,255,1);bg:rgba(0,0,0,0.8);bc:rgba(0,0,0,1);bw:2px 2px 2px 2px;"}]'
                                    data-textAlign="['center','center','center','center']"
-                                   data-paddingtop="[0,0,0,0]" data-paddingright="[30,30,30,25]" data-paddingbottom="[0,0,0,0]" data-paddingleft="[30,30,30,25]"
-                                   style="z-index: 18; white-space: nowrap; font-size: 16px; line-height: 50px; font-weight: 600; 
-                                          color: #2e313b; {{-- After Rengi --}}
-                                          font-family: 'Poppins', sans-serif; 
-                                          background-color:rgb(255,255,255); {{-- After Arka Plan --}}
-                                          border-color:rgba(255,255,255,1); border-style:solid; border-width:2px; border-radius:3px; outline:none; box-shadow:none; box-sizing:border-box; cursor:pointer; text-transform:uppercase;">
+                                   data-fontsize="['16','16','15','14']"
+                                   data-paddingtop="[0,0,0,0]" data-paddingright="[30,30,20,15]" data-paddingbottom="[0,0,0,0]" data-paddingleft="[30,30,20,15]"
+                                   style="z-index: 18; white-space: nowrap; font-size: 16px; line-height: 50px; font-weight: 600; color: #2e313b; font-family: 'Poppins', sans-serif; background-color:rgb(255,255,255); border-color:rgba(255,255,255,1); border-style:solid; border-width:2px; border-radius:3px; outline:none; box-shadow:none; box-sizing:border-box; cursor:pointer; text-transform:uppercase;">
                                    <span>{{ $slide->button_text }}</span>
                                 </a>
-                                @endif
-
-                            </li>
+                            @endif
+                        </li>
                     @empty
-                        {{-- Hiç aktif slide yoksa gösterilecek varsayılan slide --}}
-                        {{-- ... (varsayılan slide kodu aynı kalabilir) ... --}}
+                        {{-- Boş slide kısmı aynı kalabilir --}}
+                        <li data-index="rs-error" data-transition="fade" data-masterspeed="default" data-title="Error Slide">
+                            <img src="{{ asset('assets/images/main-slider/slider5/slide1.jpg') }}" alt="">
+                            <div class="tp-caption" data-x="center" data-y="center" data-type="text" style="color:red; font-size: 30px;">Slider verileri yüklenemedi!</div>
+                        </li>
                     @endforelse
-               @else
-                     {{-- Controller'dan $slides değişkeni gelmezse --}}
+                @else
                      <li data-index="rs-error" data-transition="fade" data-masterspeed="default" data-title="Error Slide">
                          <img src="{{ asset('assets/images/main-slider/slider5/slide1.jpg') }}" alt="">
                          <div class="tp-caption" data-x="center" data-y="center" data-type="text" style="color:red; font-size: 30px;">Slider verileri yüklenemedi!</div>
                      </li>
                 @endisset
-                {{-- === DİNAMİK SLIDER DÖNGÜSÜ SONU === --}}
             </ul>
             <div class="tp-bannertimer tp-bottom" style="visibility: hidden !important;"></div>
         </div>

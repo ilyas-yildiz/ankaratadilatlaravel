@@ -34,6 +34,7 @@ Route::name('frontend.')->group(function () {
     Route::get('/projelerimiz', [FrontendController::class, 'projectsIndex'])->name('projects'); // Liste sayfası
     Route::get('/projelerimiz/{slug}', [FrontendController::class, 'projectDetail'])->name('projects.detail'); // Detay sayfası
     Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index'); // Liste
+    Route::get('/blog/kategori/{slug}', [FrontendController::class, 'blogCategory'])->name('blog.category');
     Route::get('/blog/{slug}', [FrontendController::class, 'blogDetail'])->name('blog.detail');
     Route::get('/iletisim', [FrontendController::class, 'contact'])->name('contact'); // Sayfayı göster
     Route::post('/iletisim', [FrontendController::class, 'handleContactForm'])->name('contact.submit'); // Formu işle

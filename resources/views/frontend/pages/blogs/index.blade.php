@@ -121,6 +121,47 @@
                             </div> {{-- section-content sonu --}}
                         </div> {{-- widget recent-posts-entry sonu --}}
 
+                        {{-- KATEGORİLER WIDGET BAŞLANGICI --}}
+                        <div class="widget widget_services">
+                            <h4 class="widget-title">Kategoriler</h4>
+                            <div class="section-content bg-white p-a30">
+                                <ul class="list-unstyled m-b0">
+                                    @forelse($categories as $cat)
+                                        <li class="m-b10">
+                                            {{-- Ana Kategori Linki --}}
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <a href="{{ route('frontend.blog.category', $cat->slug) }}" 
+                                                   style="font-weight: 700; color: {{ $cat->color ?? '#000' }}; font-size: 16px;">
+                                                    {{ $cat->name }}
+                                                </a>
+                                                {{-- Yazı Sayısı (Opsiyonel) --}}
+                                                {{-- <span class="badge badge-light">{{ $cat->blogs_count ?? '' }}</span> --}}
+                                            </div>
+
+                                            {{-- Alt Kategoriler (Varsa) --}}
+                                            @if($cat->children->count() > 0)
+                                                <ul class="list-unstyled m-t10" style="padding-left: 20px; border-left: 2px solid #f0f0f0;">
+                                                    @foreach($cat->children as $child)
+                                                        <li class="m-b5" style="padding-left: 10px;">
+                                                            <a href="{{ route('frontend.blog.category', $child->slug) }}" class="text-muted" style="font-size: 14px; transition: 0.3s;">
+                                                                <i class="fa fa-angle-right m-r5"></i> {{ $child->name }}
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </li>
+                                        {{-- Ana kategoriler arası çizgi (sonuncusu hariç) --}}
+                                        @if(!$loop->last)
+                                            <li class="separator" style="border-bottom: 1px dashed #eee; margin: 10px 0;"></li>
+                                        @endif
+                                    @empty
+                                        <li>Kategori bulunamadı.</li>
+                                    @endforelse
+                                </ul>
+                            </div>
+                        </div>
+                        {{-- KATEGORİLER WIDGET SONU --}}
                     </div> {{-- side-bar sonu --}}
                 </div> {{-- Sidebar Kolon sonu --}}
 

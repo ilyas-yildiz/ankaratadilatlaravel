@@ -41,6 +41,37 @@ class FrontendController extends Controller
         ]);
     }
 
+// YENİ METOT: Kategoriye Göre Filtreleme
+    public function blogCategory($slug)
+    {
+        // 1. Kategoriyi Bul
+        $category = Category::where('slug', $slug)->where('status', true)->firstOrFail();
+
+        // 2. Bu kategoriye (veya alt kategorilerine) ait yazıları bul
+        // Alt kategorideki yazıları da kapsamak istersek:
+        $categoryIds = $category->children->pluck('id')->toArray();
+        $categoryIds[] = $category->id; // Kendisini de ekle
+
+        $posts = Blog::published()
+                     ->whereIn('category_id', $categoryIds)
+                     ->orderBy('published_at', 'desc')
+                     ->paginate(10);
+
+        // Sidebar verileri (Standart)
+        $latestPostsSidebar = Blog::published()->orderBy('published_at', 'desc')->take(5)->get();
+        
+        // Sidebar Kategorileri (Standart)
+        $categories = Category::whereNull('parent_id')
+                              ->with(['children' => function($q) {
+                                  $q->where('status', true)->orderBy('order', 'asc');
+                              }])
+                              ->where('status', true)
+                              ->orderBy('order', 'asc')
+                              ->get();
+
+        return view('frontend.pages.blogs.index', compact('posts', 'latestPostsSidebar', 'categories', 'category'));
+    }
+
     public function about()
     {
         $aboutData = About::where('status', true)->first();
@@ -88,15 +119,24 @@ class FrontendController extends Controller
 
     // --- BLOG BÖLÜMÜ GÜNCELLENDİ ---
 
-    public function blogIndex()
+  public function blogIndex()
     {
-        // GÜNCELLENDİ: published() scope kullanıldı ve published_at'e göre sıralandı
+        // 1. Yazıları Çek (Mevcut kodun)
         $posts = Blog::published()->orderBy('published_at', 'desc')->paginate(10); 
-
-        // GÜNCELLENDİ: published() scope kullanıldı
+        
+        // 2. Sidebar Verileri (Mevcut kodun)
         $latestPostsSidebar = Blog::published()->orderBy('published_at', 'desc')->take(5)->get();
 
-        return view('frontend.pages.blogs.index', compact('posts', 'latestPostsSidebar'));
+        // 3. YENİ: Kategorileri Hiyerarşik Çek (Sadece Ana Kategoriler, Altlarıyla Beraber)
+        $categories = Category::whereNull('parent_id') // Sadece ana kategoriler
+                              ->with(['children' => function($q) {
+                                  $q->where('status', true)->orderBy('order', 'asc');
+                              }])
+                              ->where('status', true)
+                              ->orderBy('order', 'asc')
+                              ->get();
+
+        return view('frontend.pages.blogs.index', compact('posts', 'latestPostsSidebar', 'categories'));
     }
 
    public function blogDetail($slug)

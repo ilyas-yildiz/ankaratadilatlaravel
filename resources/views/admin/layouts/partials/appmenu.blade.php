@@ -50,9 +50,22 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ route('admin.abouts.index') }}">
-                    <i class="mdi mdi-information-outline"></i> <span data-key="t-widgets">Hakkımızda</span>
+                <a class="nav-link menu-link" href="#sidebarKurumsal" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarKurumsal">
+                    <i class="mdi mdi-domain"></i> <span data-key="t-widgets">Kurumsal</span>
                 </a>
+                <div class="collapse menu-dropdown" id="sidebarKurumsal">
+                    <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.abouts.index') }}" class="nav-link" data-key="t-widgets"> Hakkımızda </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.president-messages.index') }}" class="nav-link" data-key="t-widgets"> Başkanın Mesajı </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-key="t-widgets"> Yönetim Kurulu </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
             <li class="nav-item">
                 <a class="nav-link menu-link" href="{{ route('admin.services.index') }}">

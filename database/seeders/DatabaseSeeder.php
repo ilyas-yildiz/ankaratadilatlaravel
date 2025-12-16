@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             BlogSeeder::class,
             UpdateBlogsTableSeeder::class,
             SettingsTableSeeder::class,
+            SliderSeeder::class,
         ]);
 
 

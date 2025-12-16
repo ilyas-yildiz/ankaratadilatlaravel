@@ -35,10 +35,10 @@
                             data-saveperformance="off"
                             data-title="{{ $slide->title ?? 'Slide' }}" 
                             data-description=""
-                            data-beforeafter='{"moveto":"50%|50%|50%|50%", "bgColor":"transparent", "bgType":"image", "bgImage":"{{ $slide->image_url ? asset('storage/slide-images/1920x1080/' . $slide->image_url) : asset('assets/images/main-slider/slider5/slide1.jpg') }}", "bgFit":"cover", "bgPos":"center center", "bgRepeat":"no-repeat", "direction":"horizontal", "easing":"Power2.easeInOut", "delay":"500", "time":"750", "out":"fade", "carousel":false}'>
+                            data-beforeafter='{"moveto":"50%|50%|50%|50%", "bgColor":"transparent", "bgType":"image", "bgImage":"{{ \Illuminate\Support\Str::startsWith($slide->image_url, 'assets') ? asset($slide->image_url) : asset('storage/slide-images/1920x1080/' . $slide->image_url) }}", "bgFit":"cover", "bgPos":"center center", "bgRepeat":"no-repeat", "direction":"horizontal", "easing":"Power2.easeInOut", "delay":"500", "time":"750", "out":"fade", "carousel":false}'>
 
                             {{-- SKETCH GÖRSELİ --}}
-                            <img src="{{ $slide->image_sketch_url ? asset('storage/slide-images-sketch/1920x1080/' . $slide->image_sketch_url) : asset('assets/images/main-slider/slider5/slide1-sk.jpg') }}"
+                            <img src="{{ \Illuminate\Support\Str::startsWith($slide->image_sketch_url, 'assets') ? asset($slide->image_sketch_url) : asset('storage/slide-images-sketch/1920x1080/' . $slide->image_sketch_url) }}"
                                  data-beforeafter="after"
                                  data-bgcolor='transparent' 
                                  alt="{{ $slide->title ?? '' }}"
@@ -206,15 +206,31 @@
                         </li>
                     @empty
                         {{-- Boş slide kısmı aynı kalabilir --}}
-                        <li data-index="rs-error" data-transition="fade" data-masterspeed="default" data-title="Error Slide">
+                        <li data-index="rs-error" data-transition="fade" data-masterspeed="default" data-title="Error Slide"
+                            data-beforeafter='{"moveto":"50%|50%|50%|50%", "bgColor":"transparent", "bgType":"image", "bgImage":"{{ asset('assets/images/main-slider/slider5/slide1.jpg') }}", "bgFit":"cover", "bgPos":"center center", "bgRepeat":"no-repeat", "direction":"horizontal", "easing":"Power2.easeInOut", "delay":"500", "time":"750", "out":"fade", "carousel":false}'>
                             <img src="{{ asset('assets/images/main-slider/slider5/slide1.jpg') }}" alt="">
-                            <div class="tp-caption" data-x="center" data-y="center" data-type="text" style="color:red; font-size: 30px;">Slider verileri yüklenemedi!</div>
+                            <div class="tp-caption" 
+                                 data-x="center" 
+                                 data-y="center" 
+                                 data-type="text" 
+                                 data-frames='[{"delay": 500, "speed": 300, "from": "opacity: 0", "to": "opacity: 1"}, {"delay": "wait", "speed": 300, "to": "opacity: 0"}]'
+                                 data-start="500" 
+                                 data-responsive_offset="on"
+                                 style="color:red; font-size: 30px;">Slider verileri yüklenemedi!</div>
                         </li>
                     @endforelse
                 @else
-                     <li data-index="rs-error" data-transition="fade" data-masterspeed="default" data-title="Error Slide">
+                     <li data-index="rs-error" data-transition="fade" data-masterspeed="default" data-title="Error Slide"
+                         data-beforeafter='{"moveto":"50%|50%|50%|50%", "bgColor":"transparent", "bgType":"image", "bgImage":"{{ asset('assets/images/main-slider/slider5/slide1.jpg') }}", "bgFit":"cover", "bgPos":"center center", "bgRepeat":"no-repeat", "direction":"horizontal", "easing":"Power2.easeInOut", "delay":"500", "time":"750", "out":"fade", "carousel":false}'>
                          <img src="{{ asset('assets/images/main-slider/slider5/slide1.jpg') }}" alt="">
-                         <div class="tp-caption" data-x="center" data-y="center" data-type="text" style="color:red; font-size: 30px;">Slider verileri yüklenemedi!</div>
+                         <div class="tp-caption" 
+                              data-x="center" 
+                              data-y="center" 
+                              data-type="text" 
+                              data-frames='[{"delay": 500, "speed": 300, "from": "opacity: 0", "to": "opacity: 1"}, {"delay": "wait", "speed": 300, "to": "opacity: 0"}]'
+                              data-start="500" 
+                              data-responsive_offset="on"
+                              style="color:red; font-size: 30px;">Slider verileri yüklenemedi!</div>
                      </li>
                 @endisset
             </ul>

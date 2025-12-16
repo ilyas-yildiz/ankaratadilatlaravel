@@ -112,6 +112,7 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('slides', App\Http\Controllers\Admin\SlideController::class);
         Route::resource('references', App\Http\Controllers\Admin\ReferenceController::class);
+        Route::resource('president-messages', App\Http\Controllers\Admin\PresidentMessageController::class);
     });
 });
 
